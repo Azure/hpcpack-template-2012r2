@@ -56,6 +56,13 @@
         "description": "The DNS name label of the public IP address"
       }
     },
+    "enableAcceleratedNetworking": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Specify whether to create the Azure VM with accelerated networking"
+      }
+    },
     "networkSecurityGroupId": {
       "type": "string",
       "metadata": {
@@ -103,6 +110,7 @@
             }
           }
         ],
+        "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]",
         "networkSecurityGroup": {
           "id": "[parameters('networkSecurityGroupId')]"
         }

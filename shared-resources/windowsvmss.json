@@ -85,6 +85,13 @@
         "description": "Specify whether the VM is enabled for automatic updates"
       }
     },
+    "enableAcceleratedNetworking": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Specify whether to create the Azure VM with accelerated networking"
+      }
+    },
     "clusterName": {
       "type": "string",
       "metadata": {
@@ -143,6 +150,7 @@
                 "name": "nicconfig1",
                 "properties": {
                   "primary": true,
+                  "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]",
                   "ipConfigurations": [
                     {
                       "name": "ipconfig1",

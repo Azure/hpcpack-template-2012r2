@@ -70,6 +70,13 @@
         "description": "The custom data in base64 format"
       }
     },
+    "installRDMADriver": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Specify whether to install RDMA driver"
+      }
+    },
     "enableAutomaticUpdates": {
       "type": "bool",
       "defaultValue": false,
@@ -77,11 +84,11 @@
         "description": "Specify whether the VM is enabled for automatic updates"
       }
     },
-    "installRDMADriver": {
+    "enableAcceleratedNetworking": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Specify whether to install RDMA driver"
+        "description": "Specify whether to create the Azure VM with accelerated networking"
       }
     },
     "clusterName": {
@@ -116,7 +123,8 @@
               }
             }
           }
-        ]
+        ],
+        "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]"
       }
     },
     {

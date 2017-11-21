@@ -194,6 +194,13 @@
         "description": "Administrator password for the virtual machines and the Active Directory domain"
       }
     },
+    "enableAcceleratedNetworking": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Specify whether to create the Azure VMs with accelerated networking"
+      }
+    },
     "headNodePostConfigScript": {
       "type": "string",
       "defaultValue": "",
@@ -450,6 +457,9 @@
           "publicIPDNSNameLabel": {
             "value": "[variables('publicIPDNSNameLabel')]"
           },
+          "enableAcceleratedNetworking": {
+            "value": "[parameters('enableAcceleratedNetworking')]"
+          },
           "networkSecurityGroupId": {
             "value": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
           }
@@ -652,6 +662,9 @@
           "installRDMADriver": {
             "value": "[variables('cnInstallRDMADriver')]"
           },
+          "enableAcceleratedNetworking": {
+            "value": "[parameters('enableAcceleratedNetworking')]"
+          },
           "clusterName": {
             "value": "[parameters('clusterName')]"
           },
@@ -711,6 +724,9 @@
           },
           "installRDMADriver": {
             "value": "[variables('cnInstallRDMADriver')]"
+          },
+          "enableAcceleratedNetworking": {
+            "value": "[parameters('enableAcceleratedNetworking')]"
           },
           "clusterName": {
             "value": "[parameters('clusterName')]"

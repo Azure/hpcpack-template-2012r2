@@ -83,7 +83,14 @@
       "metadata": {
         "description": "Not used for Linux nodes"
       }
-    },    
+    },
+    "enableAcceleratedNetworking": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Specify whether to create the Azure VM with accelerated networking"
+      }
+    },
     "clusterName": {
       "type": "string",
       "metadata": {
@@ -116,7 +123,8 @@
               }
             }
           }
-        ]
+        ],
+        "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]"
       }
     },
     {

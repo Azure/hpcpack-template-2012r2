@@ -137,7 +137,7 @@
     "cnInstallRDMADriver": "[contains(variables('rdmaVMSizes'), parameters('computeNodeVMSize'))]",
     "computeNodeCustomData": "[base64(concat('HPCClusterName=', parameters('clusterName'), '\r\nImageCategory=user\r\nImageName=UserCustomImage\r\nVMSize=', parameters('computeNodeVMSize')))]",
     "computeNodeTemplateName": "[if(equals(parameters('computeNodeOSType'), 'Linux'), 'linuxnode.json', 'windowsnode.json')]",
-    "sharedResxBaseUrl": "https://raw.githubusercontent.com/MsHpcPack/HPCPack2012R2/master/shared-resources"
+    "sharedResxBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources"
   },
   "resources": [
     {
