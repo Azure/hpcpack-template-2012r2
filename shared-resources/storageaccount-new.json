@@ -21,7 +21,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2017-06-01",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[parameters('storageAccountName')]",
       "location": "[resourceGroup().location]",
@@ -33,7 +33,7 @@
   "outputs": {
     "connectionString": {
       "type": "string",
-      "value": "[concat(variables('storageConnStrPrefix'), listKeys(variables('storageAccountId'), '2017-06-01').key1)]"
+      "value": "[concat(variables('storageConnStrPrefix'), listKeys(variables('storageAccountId'), '2015-06-15').key1)]"
     }
   }
 }
