@@ -33,7 +33,7 @@
   "outputs": {
     "connectionString": {
       "type": "string",
-      "value": "[concat(variables('storageConnStrPrefix'), listKeys(variables('storageAccountId'), parameters('apiVersion')).key1)]"
+      "value": "[concat(variables('storageConnStrPrefix'), listKeys(variables('storageAccountId'), '2017-06-01').key1)]"
     }
   }
 }
