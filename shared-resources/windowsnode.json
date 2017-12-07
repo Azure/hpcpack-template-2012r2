@@ -2,12 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "apiVersion": {
-      "type": "string",
-      "metadata": {
-        "description": "The API version"
-      }
-    },
     "nicName": {
       "type": "string",
       "metadata": {
@@ -108,7 +102,7 @@
   },
   "resources": [
     {
-      "apiVersion": "[parameters('apiVersion')]",
+      "apiVersion": "2017-06-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[parameters('nicName')]",
       "location": "[resourceGroup().location]",
@@ -128,7 +122,7 @@
       }
     },
     {
-      "apiVersion": "2016-04-30-preview",
+      "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('vmName')]",
       "location": "[resourceGroup().location]",
@@ -175,7 +169,7 @@
           "condition": "[parameters('installRDMADriver')]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'), '/installRDMADriver')]",
-          "apiVersion": "[parameters('apiVersion')]",
+          "apiVersion": "2017-03-30",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
@@ -190,7 +184,7 @@
         {
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'),'/joinADDomain')]",
-          "apiVersion": "[parameters('apiVersion')]",
+          "apiVersion": "2017-03-30",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",

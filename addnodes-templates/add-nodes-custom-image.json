@@ -110,7 +110,6 @@
     }
   },
   "variables": {
-    "apiVersion": "2015-06-15",
     "storageAccountTypes": {
       "HDD": "Standard_LRS",
       "SSD": "Premium_LRS"
@@ -143,7 +142,7 @@
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[concat(variables('availabilitySetNamePrefix'), padLeft(string(copyIndex()), 2, '0'))]",
-      "apiVersion": "2016-04-30-preview",
+      "apiVersion": "2017-03-30",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Aligned"
@@ -158,7 +157,7 @@
       }
     },
     {
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-09-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', parameters('computeNodeNamePrefix'), padLeft(string(copyIndex(parameters('computeNodeNameStartIndex'))), 3, '0'))]",
       "dependsOn": [
@@ -175,9 +174,6 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "apiVersion": {
-            "value": "[variables('apiVersion')]"
-          },
           "nicName": {
             "value": "[concat(parameters('computeNodeNamePrefix'), padLeft(string(copyIndex(parameters('computeNodeNameStartIndex'))), 3, '0'), variables('nicNameSuffix'))]"
           },
