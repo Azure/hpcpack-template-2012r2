@@ -85,6 +85,12 @@
         "description": "The existing subnet in which all VMs of the HPC cluster will be created."
       }
     },
+    "dnsServer": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP address of the dns server for the compute nodes."
+      }
+    },
     "enableAcceleratedNetworking": {
       "type": "string",
       "defaultValue": "No",
@@ -183,7 +189,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('sharedResxBaseUrl'), '/windowsnode.json')]",
+          "uri": "[concat(variables('sharedResxBaseUrl'), '/windowsnode-customdns.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -222,6 +228,12 @@
           },
           "enableAcceleratedNetworking": {
             "value": "[if(equals(parameters('enableAcceleratedNetworking'), 'Yes'), bool('true'), bool('false'))]"
+          },
+          "dnsServers": {
+            "value": [
+              "[parameters('dnsServer')]",
+              "8.8.8.8"
+            ]
           },
           "clusterName": {
             "value": "[parameters('clusterName')]"

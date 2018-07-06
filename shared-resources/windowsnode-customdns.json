@@ -86,6 +86,13 @@
         "description": "Specify whether to create the Azure VM with accelerated networking"
       }
     },
+    "dnsServers": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "The DNS servers"
+      }
+    },
     "clusterName": {
       "type": "string",
       "metadata": {
@@ -122,6 +129,9 @@
             }
           }
         ],
+        "dnsSettings": {
+          "dnsServers": "[parameters('dnsServers')]"
+        },
         "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]"
       }
     },

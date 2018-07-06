@@ -104,7 +104,7 @@
         "No"
       ],
       "metadata": {
-        "description": "Specify whether to create the Azure VMs with accelerated networking or not. More information about accelerated networking please see https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-powershell."
+        "description": "Specify whether to create the Azure VMs with accelerated networking or not. Note accelerated networking is supported only for some VM sizes and operating systems. More information about accelerated networking please see https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-powershell."
       }
     },
     "clusterName": {
@@ -142,7 +142,9 @@
       "Standard_A9",
       "Standard_H16r",
       "Standard_H16mr",
-      "Standard_NC24r"
+      "Standard_NC24r",
+      "Standard_NC24rs_v2",
+      "Standard_ND24rs"
     ],
     "cnInstallRDMADriver": "[contains(variables('rdmaVMSizes'), parameters('computeNodeVMSize'))]",
     "computeNodeCustomData": "[base64(concat('HPCClusterName=', parameters('clusterName'), '\r\nImageCategory=user\r\nImageName=UserCustomImage\r\nVMSize=', parameters('computeNodeVMSize')))]",
@@ -151,9 +153,10 @@
   },
   "resources": [
     {
+      "condition": "[variables('cnInstallRDMADriver')]",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[concat(variables('availabilitySetNamePrefix'), padLeft(string(copyIndex()), 2, '0'))]",
-      "apiVersion": "2017-03-30",
+      "apiVersion": "2017-12-01",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Aligned"
@@ -168,7 +171,7 @@
       }
     },
     {
-      "apiVersion": "2016-09-01",
+      "apiVersion": "2017-05-10",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', parameters('computeNodeNamePrefix'), padLeft(string(copyIndex(parameters('computeNodeNameStartIndex'))), 3, '0'))]",
       "dependsOn": [
@@ -210,7 +213,7 @@
             "value": "[parameters('domainUserPassword')]"
           },
           "availabilitySetName": {
-            "value": "[concat(variables('availabilitySetNamePrefix'), padLeft(string(div(copyIndex(parameters('computeNodeNameStartIndex')), variables('nbrVMPerAvailabilitySet'))), 2, '0'))]"
+            "value": "[if(variables('cnInstallRDMADriver'), concat(variables('availabilitySetNamePrefix'), padLeft(string(div(copyIndex(parameters('computeNodeNameStartIndex')), variables('nbrVMPerAvailabilitySet'))), 2, '0')), '')]"
           },
           "customData": {
             "value": "[variables('computeNodeCustomData')]"
