@@ -274,13 +274,13 @@
     "computeNodeTemplateUrl": "[concat(parameters('artifactsBaseUrl'), '/', variables('computeNodeTemplateName'))]",
     "computeNodeVmssTemplateName": "[if(equals(parameters('computeNodeImageOsPlatform'), 'Linux'), 'linuxvmss.json', 'windowsvmss.json')]",
     "computeNodeVmssTemplateUrl": "[concat(parameters('artifactsBaseUrl'), '/', variables('computeNodeVmssTemplateName'))]",
-    "fakeCusomImageReference": {
+    "userCustomImageReference": {
       "publisher": "user",
       "offer": "custom",
       "sku": "image",
       "version": "latest"
     },
-    "cusomDataImageRef": "[if(variables('computeNodeUsesCustomImage'), variables('fakeCusomImageReference'), parameters('computeNodeImageRef'))]",
+    "cusomDataImageRef": "[if(variables('computeNodeUsesCustomImage'), variables('userCustomImageReference'), parameters('computeNodeImageRef'))]",
     "customDataImageName": "[concat(variables('cusomDataImageRef').offer, '-', variables('cusomDataImageRef').sku)]",
     "customDataImageCategory": "[if(variables('computeNodeUsesCustomImage'), 'user', 'public')]",
     "computeNodeCustomData": "[base64(concat('HPCClusterName=', parameters('clusterName'), '\r\nImageCategory=', variables('customDataImageCategory'), '\r\nImageName=', variables('customDataImageName'), '\r\nVMSize=', parameters('computeNodeVMSize')))]",
