@@ -218,7 +218,7 @@
   },
   "variables": {
     "defaultSoaStorageAccountName": "[toLower(concat('hpc', uniqueString(resourceGroup().id, toLower(parameters('clusterName')))))]",
-    "soaStorageAccountName": "[if(and(parameters('createStorageAccountForSOA'), empty(parameters('soaStorageAccountName'))), variables('defaultSoaStorageAccountName'), parameters('soaStorageAccountName'))]",
+    "soaStorageAccountName": "[if(empty(parameters('soaStorageAccountName')), variables('defaultSoaStorageAccountName'), parameters('soaStorageAccountName'))]",
     "soaStorageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('soaStorageAccountName'))]",
     "soaStorageConnStrPrefix": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('soaStorageAccountName'), ';AccountKey=')]",
     "storageAccountTypes": {
@@ -243,8 +243,8 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]",
     "publicIPAddressRgName": "[if(equals(parameters('publicIPCreateOption'), 'existing'), parameters('publicIPRGName'), resourceGroup().name)]",
     "defaultPublicIPName": "[concat(parameters('clusterName'), '-PublicIP-HN')]",
-    "publicIPAddressName": "[if(and(empty(parameters('publicIPName')), equals(parameters('publicIPCreateOption'), 'new')), variables('defaultPublicIPName'), parameters('publicIPName'))]",
-    "publicIPDNSNameLabel": "[if(and(empty(parameters('publicIPDNSNameLabel')), equals(parameters('publicIPCreateOption'), 'new')), parameters('clusterName'), parameters('publicIPDNSNameLabel'))]",
+    "publicIPAddressName": "[if(empty(parameters('publicIPName')), variables('defaultPublicIPName'), parameters('publicIPName'))]",
+    "publicIPDNSNameLabel": "[if(empty(parameters('publicIPDNSNameLabel')), parameters('clusterName'), parameters('publicIPDNSNameLabel'))]",
     "publicIpAddressId": {
       "id": "[resourceId(variables('publicIPAddressRgName'), 'Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
     },
