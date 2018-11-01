@@ -41,7 +41,7 @@
       }
     },
     "virtualNetworkAddressPrefixes": {
-      "type": "string",
+      "type": "array",
       "defaultValue": [ "10.0.0.0/16" ],
       "metadata": {
         "description": "The address prefix of the virtual network, only used when 'newOrExistingDomainForest' is specified as 'new'."
