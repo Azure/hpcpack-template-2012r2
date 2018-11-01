@@ -350,8 +350,8 @@
           "domainName": {
             "value": "[parameters('domainName')]"
           },
-          "createStorageAccountForSOA": {
-            "value": "[if(equals(parameters('createStorageAccountForSOA'), 'Yes'), bool('true'), bool('false'))]"
+          "soaStorageAccountCreateOption": {
+            "value": "[if(equals(parameters('createStorageAccountForSOA'), 'Yes'), 'new', 'none')]"
           },
           "headNodeDiskType": {
             "value": "[parameters('headNodeDiskType')]"
