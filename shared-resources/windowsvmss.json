@@ -156,7 +156,6 @@
                     {
                       "name": "ipconfig1",
                       "properties": {
-                        "privateIPAllocationMethod": "Dynamic",
                         "subnet": {
                           "id": "[parameters('subnetId')]"
                         }
