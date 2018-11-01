@@ -170,7 +170,7 @@
     }
   },
   "variables": {
-    "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources",
+    "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources/",
     "computeNodeImageOsPlatform": "Windows",
     "computeNodeImages": {
       "ComputeNode": {
@@ -196,7 +196,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('artifactsBaseUrl'), '/mainTemplate.json')]",
+          "uri": "[uri(variables('artifactsBaseUrl'), 'mainTemplate.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -266,7 +266,7 @@
           "headNodePostConfigScript": {
             "value": "[trim(parameters('headNodePostConfigScript'))]"
           },
-          "artifactsBaseUrl": {
+          "_artifactsLocation": {
             "value": "[variables('artifactsBaseUrl')]"
           }
         }
