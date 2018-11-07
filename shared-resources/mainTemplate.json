@@ -282,6 +282,7 @@
     "privateClusterFQDN": "[concat(parameters('clusterName'), '.', parameters('domainName'))]",
     "vmssSinglePlacementGroup": "[lessOrEquals(parameters('computeNodeNumber'), if(variables('computeNodeUsesCustomImage'), 40, 100))]",
     "vnetRGName": "[if(empty(parameters('virtualNetworkResourceGroupName')), resourceGroup().name, parameters('virtualNetworkResourceGroupName'))]",
+    "subnetAddressPrefix": "[if(empty(parameters('subnetAddressPrefix')), '10.0.0.0/22', parameters('subnetAddressPrefix'))]",
     "hnPrivateIPAllocationMethod": "[if(equals(parameters('newOrExistingDomainForest'), 'new'), 'Static', 'Dynamic')]",
     "headNodePrivateIP": "[if(empty(parameters('subnetStartAddress')), '10.0.0.4', parameters('subnetStartAddress'))]",
     "vnetID": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
@@ -359,7 +360,7 @@
           {
             "name": "[parameters('subnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('subnetAddressPrefix')]"
+              "addressPrefix": "[variables('subnetAddressPrefix')]"
             }
           }
         ]
@@ -532,6 +533,9 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
           "vmName": {
             "value": "[parameters('clusterName')]"
           },
@@ -592,7 +596,7 @@
               "apiVersion": "2018-08-01",
               "name": "[parameters('virtualNetworkName')]",
               "type": "Microsoft.Network/virtualNetworks",
-              "location": "[resourceGroup().location]",
+              "location": "[parameters('location')]",
               "properties": {
                 "addressSpace": {
                   "addressPrefixes": "[parameters('virtualNetworkAddressPrefixes')]"
@@ -663,6 +667,9 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
           "nicName": {
             "value": "[concat(parameters('computeNodeNamePrefix'), padLeft(string(copyIndex()), 3, '0'), variables('nicNameSuffix'))]"
           },
@@ -723,6 +730,9 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
           "subnetId": {
             "value": "[variables('subnetRef')]"
           },
