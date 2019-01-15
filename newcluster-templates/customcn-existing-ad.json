@@ -297,7 +297,7 @@
             "value": "[variables('headNodePostConfigScriptFileUrls')]"
           },
           "headNodePostConfigScriptCommand": {
-            "value": "[trim(parameters('computeNodePostConfigScriptCommand'))]"
+            "value": "[trim(parameters('headNodePostConfigScriptCommand'))]"
           },
           "computeNodePostConfigScriptFileUrls": {
             "value": "[variables('computeNodePostConfigScriptFileUrls')]"
