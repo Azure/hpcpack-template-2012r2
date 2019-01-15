@@ -144,15 +144,39 @@
         "description": "Indicates whether to create the storage account for SOA common data and SOA session monitoring features."
       }
     },
-    "headNodePostConfigScript": {
+    "headNodePostConfigScriptFileUrls": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Optional URL of a public available PowerShell script you want to run on the head node after it is configured. The script will be run as the Local System account. You can also specify arguments for the script, for example 'http://www.contoso.com/myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+        "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the head node after it is configured. Split with a single space (' ') for multiple URLs. The script will be run as the Local System account."
+      }
+    },
+    "headNodePostConfigScriptCommand": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, the command line to run the head node post-config script. The script will be run as the Local System account. For example 'myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+      }
+    },
+    "computeNodePostConfigScriptFileUrls": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. Split with a single space (' ') for multiple URLs. The script will be run as the Local System account (or root for Linux nodes)."
+      }
+    },
+    "computeNodePostConfigScriptCommand": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, the command line to run the compute node post-config script. The script will be run as the Local System account. For example 'mycnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
       }
     }
   },
   "variables": {
+    "emptyArray": [],
+    "headNodePostConfigScriptFileUrls": "[if(empty(trim(parameters('headNodePostConfigScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('headNodePostConfigScriptFileUrls')), ' '))]",
+    "computeNodePostConfigScriptFileUrls": "[if(empty(trim(parameters('computeNodePostConfigScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('computeNodePostConfigScriptFileUrls')), ' '))]",
     "virtualNetworkName": "[concat(parameters('clusterName'), 'VNet')]",
     "subnetName": "Subnet-1",
     "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources/",
@@ -233,8 +257,17 @@
           "enableAcceleratedNetworking": {
             "value": "[if(equals(parameters('enableAcceleratedNetworking'), 'Yes'), bool('true'), bool('false'))]"
           },
-          "headNodePostConfigScript": {
-            "value": "[trim(parameters('headNodePostConfigScript'))]"
+          "headNodePostConfigScriptFileUrls": {
+            "value": "[variables('headNodePostConfigScriptFileUrls')]"
+          },
+          "headNodePostConfigScriptCommand": {
+            "value": "[trim(parameters('computeNodePostConfigScriptCommand'))]"
+          },
+          "computeNodePostConfigScriptFileUrls": {
+            "value": "[variables('computeNodePostConfigScriptFileUrls')]"
+          },
+          "computeNodePostConfigScriptCommand": {
+            "value": "[trim(parameters('computeNodePostConfigScriptCommand'))]"
           },
           "_artifactsLocation": {
             "value": "[variables('artifactsBaseUrl')]"

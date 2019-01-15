@@ -10,7 +10,7 @@
     [Parameter(Mandatory=$true, ParameterSetName='NodePrepare')]
     [String] $AdminBase64Password,
 
-    [Parameter(Mandatory=$true, ParameterSetName='NodePrepare')]
+    [Parameter(Mandatory=$false, ParameterSetName='NodePrepare')]
     [String] $PublicDnsName,
 
     [Parameter(Mandatory=$false, ParameterSetName='NodePrepare')]
@@ -123,13 +123,13 @@ else
     [Environment]::SetEnvironmentVariable("HPCHNDeployRoot", $HPCHNDeployRoot, [System.EnvironmentVariableTarget]::Process)
     [Environment]::SetEnvironmentVariable("HPCInfoLogFile", $HPCInfoLogFile, [System.EnvironmentVariableTarget]::Process)
 
-    TraceInfo "Configuring head node: -DomainFQDN $DomainFQDN -PublicDnsName $PublicDnsName -AdminUserName $AdminUserName -CNSize $CNSize -UnsecureDNSUpdate:$UnsecureDNSUpdate -PostConfigScript $PostConfigScript"
+    TraceInfo "Configuring head node: -DomainFQDN '$DomainFQDN' -PublicDnsName '$PublicDnsName' -AdminUserName $AdminUserName -CNSize $CNSize -UnsecureDNSUpdate:$UnsecureDNSUpdate -PostConfigScript '$PostConfigScript'"
     if(Test-Path -Path $configFlagFile)
     {
         TraceInfo 'This head node was already configured'
     }
     else
-    {
+    {        
         $maxRetries = 3
         $retry = 0
         while($true)
@@ -181,6 +181,12 @@ else
             }
 
             TraceInfo "The information needed for in-box management scripts succcessfully configured."
+        }
+
+        # If PublicDnsName not given, use the full domain name of the computer
+        if(-not $PublicDnsName)
+        {
+            $PublicDnsName = $env:COMPUTERNAME + ".$DomainFQDN"
         }
 
         Import-Module ScheduledTasks
@@ -517,100 +523,110 @@ else
             $firstSpace = $PostConfigScript.IndexOf(' ')
             if($firstSpace -gt 0)
             {
-                $scriptUrl = $PostConfigScript.Substring(0, $firstSpace)
+                $scriptFile = $PostConfigScript.Substring(0, $firstSpace)
                 $scriptArgs = $PostConfigScript.Substring($firstSpace + 1).Trim()
             }
             else
             {
-                $scriptUrl = $PostConfigScript
+                $scriptFile = $PostConfigScript
                 $scriptArgs = ""
             }
 
-            if(-not [system.uri]::IsWellFormedUriString($scriptUrl,[System.UriKind]::Absolute) -or $scriptUrl -notmatch '[^/]/[^/]+\.ps1$')
+            if($scriptFile -notmatch '[^/]+\.ps1$')
             {
-                TraceInfo "Invalid url or not PowerShell script: $scriptUrl"
-                throw "Invalid url or not PowerShell script: $scriptUrl"
+                TraceInfo "Invalid post config script file, only PowerShell script file supported: $scriptFile"
+                throw "Invalid post config script file, only PowerShell script file supported: $scriptFile"
             }
-            else
+
+            if([system.uri]::IsWellFormedUriString($scriptFile, [System.UriKind]::Absolute))
             {
-                $scriptFileName = $($scriptUrl -split '/')[-1]
+                $scriptFileName = $($scriptFile -split '/')[-1]
                 $scriptFilePath = "$env:HPCHNDeployRoot\$scriptFileName"
 
                 $downloader = New-Object System.Net.WebClient
                 $downloadRetry = 0
-                $downloaded = $false
                 while($true)
                 {
                     try
                     {
-                        TraceInfo "Downloading custom script file from $scriptUrl to $scriptFilePath(Retry=$downloadRetry)."
-                        $downloader.DownloadFile($scriptUrl, $scriptFilePath)
-                        TraceInfo "Downloaded custom script file from $scriptUrl to $scriptFilePath."
-                        $downloaded = $true
+                        TraceInfo "Downloading custom script file from $scriptFile to $scriptFilePath(Retry=$downloadRetry)."
+                        $downloader.DownloadFile($scriptFile, $scriptFilePath)
+                        TraceInfo "Downloaded custom script file from $scriptFile to $scriptFilePath."
                         break
                     }
                     catch
                     {
                         if($downloadRetry -lt 10)
                         {
-                            TraceInfo ("Failed to download $scriptUrl, retry after 20 seconds:" + $_)
+                            TraceInfo ("Failed to download $scriptFile, retry after 20 seconds:" + $_)
                             Clear-DnsClientCache
                             Start-Sleep -Seconds 20
                             $downloadRetry++
                         }
                         else
                         {
-                            throw "Failed to download from $scriptUrl after 10 retries"
+                            throw "Failed to download from $scriptFile after 10 retries"
                         }
                     }
                 }
-
-                # Sometimes the new process failed to run due to system not ready, we try to create a test file to check whether the process works
-                $testFileName = "$env:HPCHNDeployRoot\HPCPostConfigScriptTest."  + (Get-Random)
-                if(-not $scriptArgs.Contains(' *> '))
+            }
+            else
+            {
+                if(-not (Test-Path $scriptFile -PathType Leaf))
                 {
-                    $logFilePath = [IO.Path]::ChangeExtension($scriptFilePath, $null) + (Get-Date -Format "yyyy_MM_dd-hh_mm_ss") + ".log"
-                    $scriptArgs += " *> `"$logFilePath`""
+                    TraceInfo "Post config script file not found: $scriptFile"
+                    throw "Post config script file not found: $scriptFile"
                 }
-                $scriptCmd = "'test' | Out-File '$testFileName' -Confirm:`$false -Force;& '$scriptFilePath' $scriptArgs"
-                $encodedCmd = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($scriptCmd))
-                $scriptRetry = 0
-                while($downloaded)
-                {
-                    $pobj = Invoke-WmiMethod -Path win32_process -Name Create -ArgumentList "PowerShell.exe -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -EncodedCommand $encodedCmd"
-                    if($pobj.ReturnValue -eq 0)
-                    {
-                        Start-Sleep -Seconds 5
-                        if(Test-Path -Path $testFileName)
-                        {
-                            # Remove the test file
-                            Remove-Item -Path $testFileName -Force -ErrorAction Continue
-                            TraceInfo "Started to run: $scriptFilePath $scriptArgs."
-                            $PostConfigScript | Out-File $postScriptFlagFile -Confirm:$false -Force
-                            break
-                        }
-                        else
-                        {
-                            TraceInfo "The new process failed to run, stop it."
-                            Stop-Process -Id $pobj.ProcessId
-                        }
-                    }
-                    else
-                    {
-                        TraceInfo "Failed to start process: $scriptFilePath $scriptArgs."
-                    }
+                
+                $scriptFilePath = [IO.Path]::Combine($PSScriptRoot, $scriptFile)
+            }
 
-                    if($scriptRetry -lt 10)
+            # Sometimes the new process failed to run due to system not ready, we try to create a test file to check whether the process works
+            $testFileName = "$env:HPCHNDeployRoot\HPCPostConfigScriptTest."  + (Get-Random)
+            if(-not $scriptArgs.Contains(' *> '))
+            {
+                $logFilePath = [IO.Path]::ChangeExtension($scriptFilePath, $null) + (Get-Date -Format "yyyy_MM_dd-hh_mm_ss") + ".log"
+                $scriptArgs += " *> `"$logFilePath`""
+            }
+            $scriptCmd = "'test' | Out-File '$testFileName' -Confirm:`$false -Force;& '$scriptFilePath' $scriptArgs"
+            $encodedCmd = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($scriptCmd))
+            $scriptRetry = 0
+            while($true)
+            {
+                $pobj = Invoke-WmiMethod -Path win32_process -Name Create -ArgumentList "PowerShell.exe -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -EncodedCommand $encodedCmd"
+                if($pobj.ReturnValue -eq 0)
+                {
+                    Start-Sleep -Seconds 5
+                    if(Test-Path -Path $testFileName)
                     {
-                        $scriptRetry++
-                        Start-Sleep -Seconds 10
+                        # Remove the test file
+                        Remove-Item -Path $testFileName -Force -ErrorAction Continue
+                        TraceInfo "Started to run: $scriptFilePath $scriptArgs."
+                        $PostConfigScript | Out-File $postScriptFlagFile -Confirm:$false -Force
+                        break
                     }
                     else
                     {
-                        throw "Failed to run post configuration script: $scriptFilePath $scriptArgs."
+                        TraceInfo "The new process failed to run, stop it."
+                        Stop-Process -Id $pobj.ProcessId
                     }
+                }
+                else
+                {
+                    TraceInfo "Failed to start process: $scriptFilePath $scriptArgs."
+                }
+
+                if($scriptRetry -lt 10)
+                {
+                    $scriptRetry++
+                    Start-Sleep -Seconds 10
+                }
+                else
+                {
+                    throw "Failed to run post configuration script: $scriptFilePath $scriptArgs."
                 }
             }
         }
     }
 }
+

@@ -35,7 +35,6 @@
     },
     "storageAccountType": {
       "type": "string",
-      "allowedValues": [ "Standard_LRS", "Premium_LRS" ],
       "metadata": {
         "description": "The storage account type for the disks of the VM"
       }
@@ -111,6 +110,20 @@
       "metadata": {
         "description": "The fully qualified domain name (FQDN) for the domain forest in which the compute node will join, for example 'hpc.local'."
       }
+    },
+    "computeNodePostConfigScriptFileUrls": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. The script will be run as the Local System account (or root for Linux nodes)."
+      }
+    },
+    "computeNodePostConfigScriptCommand": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, the command line to run the compute node post-config script. The script will be run as the Local System account. For example 'mycnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+      }
     }
   },
   "variables": {
@@ -143,7 +156,7 @@
       }
     },
     {
-      "apiVersion": "2018-06-01",
+      "apiVersion": "2018-10-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('vmName')]",
       "location": "[parameters('location')]",
@@ -188,7 +201,7 @@
           "condition": "[parameters('installRDMADriver')]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'), '/installRDMADriver')]",
-          "apiVersion": "2018-06-01",
+          "apiVersion": "2018-10-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
@@ -203,7 +216,7 @@
         {
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'),'/joinADDomain')]",
-          "apiVersion": "2018-06-01",
+          "apiVersion": "2018-10-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
@@ -224,6 +237,28 @@
             },
             "protectedSettings": {
               "Password": "[parameters('adminPassword')]"
+            }
+          }
+        },
+        {
+          "condition": "[not(empty(parameters('computeNodePostConfigScriptCommand')))]",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "[concat(parameters('vmName'),'/postConfigScript')]",
+          "apiVersion": "2018-10-01",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'), '/extensions/joinADDomain')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": "[parameters('computeNodePostConfigScriptFileUrls')]"
+            },
+            "protectedSettings": {
+              "commandToExecute": "[if(endsWith(tolower(split(parameters('computeNodePostConfigScriptCommand'), ' ')[0]), '.ps1'), concat('powershell.exe -ExecutionPolicy Unrestricted -File ', parameters('computeNodePostConfigScriptCommand')), parameters('computeNodePostConfigScriptCommand'))]"
             }
           }
         }
