@@ -730,6 +730,7 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('soaStorageAccountName'))]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('clusterName'), '/extensions/JoinADDomain')]",
         "Microsoft.Resources/deployments/updateVNetDNS"
       ],
       "properties": {

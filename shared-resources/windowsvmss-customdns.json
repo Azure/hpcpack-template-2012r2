@@ -222,6 +222,7 @@
       "name": "[concat(parameters('vmssName'),'/installRDMADriver')]",
       "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
       "apiVersion": "2018-10-01",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('vmssName'))]"
       ],
@@ -237,6 +238,7 @@
       "name": "[concat(parameters('vmssName'),'/postConfigScript')]",
       "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
       "apiVersion": "2018-10-01",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('vmssName'))]"
       ],

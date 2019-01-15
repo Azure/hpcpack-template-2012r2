@@ -235,6 +235,7 @@
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'),'/postConfigScript')]",
           "apiVersion": "2018-10-01",
+          "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'), '/extensions/joinADDomain')]"
