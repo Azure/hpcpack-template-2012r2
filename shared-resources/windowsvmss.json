@@ -166,8 +166,8 @@
         }
       }
     },
-    "midVmssExtensions": "[if(parameters('installRDMADriver'), add(variables('basicVmssExtension'), array(variables('hpcDriverExtension'))), variables('basicVmssExtension'))]",
-    "vmssExtensions": "[if(empty(parameters('computeNodePostConfigScriptCommand')), variables('midVmssExtensions'), add(variables('midVmssExtensions'), array(variables('postConfigScriptExtension'))))]"
+    "midVmssExtensions": "[if(parameters('installRDMADriver'), concat(variables('basicVmssExtension'), array(variables('hpcDriverExtension'))), variables('basicVmssExtension'))]",
+    "vmssExtensions": "[if(empty(parameters('computeNodePostConfigScriptCommand')), variables('midVmssExtensions'), concat(variables('midVmssExtensions'), array(variables('postConfigScriptExtension'))))]"
   },
   "resources": [
     {

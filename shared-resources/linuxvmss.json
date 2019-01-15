@@ -149,7 +149,7 @@
         }
       }
     },
-    "vmssExtensions": "[if(empty(parameters('computeNodePostConfigScriptCommand')), variables('basicVmssExtension'), add(variables('basicVmssExtension'), array(variables('postConfigScriptExtension'))))]"
+    "vmssExtensions": "[if(empty(parameters('computeNodePostConfigScriptCommand')), variables('basicVmssExtension'), concat(variables('basicVmssExtension'), array(variables('postConfigScriptExtension'))))]"
   },
   "resources": [
     {
