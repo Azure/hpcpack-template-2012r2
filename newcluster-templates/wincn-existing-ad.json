@@ -43,13 +43,14 @@
     },
     "headNodeDiskType": {
       "type": "string",
-      "defaultValue": "SSD",
+      "defaultValue": "Premium_SSD",
       "allowedValues": [
-        "HDD",
-        "SSD"
+        "Standard_HDD",
+        "Standard_SSD",
+        "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of head node VM. Note that SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+        "description": "The disk type of head node VM. Note that Premium_SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
       }
     },
     "computeNodeImage": {
@@ -68,7 +69,7 @@
       "minLength": 1,
       "maxLength": 12,
       "metadata": {
-        "description": "The name prefix of the compute nodes. It must be no more than 12(or 9 if you use VMSS) characters, begin with a letter, and contain only letters, numbers. Make sure the compute node names are unique in the domain forest."
+        "description": "The name prefix of the compute nodes. It must be no more than 12(or 9 if you use VMSS) characters, begin with a letter, and contain only letters, numbers; The compute node name pattern is '&lt;NamePrefix&gt;&lt;index&gt;', the width of index is 3 (or 6 for VMSS) characters, make sure the compute node names are unique in the domain forest."
       }
     },
     "computeNodeNumber": {
@@ -89,13 +90,14 @@
     },
     "computeNodeDiskType": {
       "type": "string",
-      "defaultValue": "HDD",
+      "defaultValue": "Standard_HDD",
       "allowedValues": [
-        "HDD",
-        "SSD"
+        "Standard_HDD",
+        "Standard_SSD",
+        "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of the compute node VMs. Note that SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+        "description": "The disk type of compute node VM. Note that Premium_SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
       }
     },
     "useVmssForComputeNodes": {
@@ -106,7 +108,7 @@
         "No"
       ],
       "metadata": {
-        "description": "Specify whether to use VM scale set to create compute nodes. 'Yes' for VM scale set, 'No' for VMs"
+        "description": "Specify whether to use VM scale set to create compute nodes. 'Yes' for VM scale set, 'No' for VMs. Note it is an experimental feature to create the compute nodes as VM scale set. Some HPC features(for example 'Azure auto grow shrink') will not work if you use this feature."
       }
     },
     "enableAcceleratedNetworking": {
@@ -195,6 +197,11 @@
     "headNodePostConfigScriptFileUrls": "[if(empty(trim(parameters('headNodePostConfigScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('headNodePostConfigScriptFileUrls')), ' '))]",
     "computeNodePostConfigScriptFileUrls": "[if(empty(trim(parameters('computeNodePostConfigScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('computeNodePostConfigScriptFileUrls')), ' '))]",
     "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources/",
+    "diskTypes": {
+      "Standard_HDD": "Standard_LRS",
+      "Standard_SSD": "StandardSSD_LRS",
+      "Premium_SSD": "Premium_LRS"
+    },
     "computeNodeImageOsPlatform": "Windows",
     "computeNodeImages": {
       "ComputeNode": {
@@ -246,7 +253,7 @@
             "value": "[if(equals(parameters('createStorageAccountForSOA'), 'Yes'), 'new', 'none')]"
           },
           "headNodeDiskType": {
-            "value": "[parameters('headNodeDiskType')]"
+            "value": "[variables('diskTypes')[parameters('headNodeDiskType')]]"
           },
           "headNodeVMSize": {
             "value": "[parameters('headNodeVMSize')]"
@@ -267,7 +274,7 @@
             "value": "[parameters('computeNodeNumber')]"
           },
           "computeNodeDiskType": {
-            "value": "[parameters('computeNodeDiskType')]"
+            "value": "[variables('diskTypes')[parameters('computeNodeDiskType')]]"
           },
           "computeNodeVMSize": {
             "value": "[parameters('computeNodeVMSize')]"
