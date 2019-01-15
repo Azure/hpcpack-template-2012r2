@@ -120,6 +120,36 @@
     }
   },
   "variables": {
+    "basicVmssExtension": [
+      {
+        "name": "installHPCNodeAgent",
+        "properties": {
+          "publisher": "Microsoft.HpcPack",
+          "type": "LinuxNodeAgent",
+          "typeHandlerVersion": "1.6",
+          "autoUpgradeMinorVersion": true,
+          "protectedSettings": {
+            "ClusterName": "[concat(parameters('clusterName'), '.', parameters('domainName'))]"
+          }
+        }
+      }
+    ],
+    "postConfigScriptExtension": {
+      "name": "postConfigScript",
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": "[parameters('computeNodePostConfigScriptFileUrls')]"
+        },
+        "protectedSettings": {
+          "commandToExecute": "[parameters('computeNodePostConfigScriptCommand')]"
+        }
+      }
+    },
+    "vmssExtensions": "[if(empty(parameters('computeNodePostConfigScriptCommand')), variables('basicVmssExtension'), add(variables('basicVmssExtension'), array(variables('postConfigScriptExtension'))))]"
   },
   "resources": [
     {
@@ -177,43 +207,8 @@
             ]
           },
           "extensionProfile": {
-            "extensions": [
-              {
-                "name": "installHPCNodeAgent",
-                "properties": {
-                  "publisher": "Microsoft.HpcPack",
-                  "type": "LinuxNodeAgent",
-                  "typeHandlerVersion": "1.6",
-                  "autoUpgradeMinorVersion": true,
-                  "protectedSettings": {
-                    "ClusterName": "[concat(parameters('clusterName'), '.', parameters('domainName'))]"
-                  }
-                }
-              }
-            ]
+            "extensions": "[variables('vmssExtensions')]"
           }
-        }
-      }
-    },
-    {
-      "condition": "[not(empty(parameters('computeNodePostConfigScriptCommand')))]",
-      "name": "[concat(parameters('vmssName'),'/postConfigScript')]",
-      "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
-      "apiVersion": "2018-10-01",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('vmssName'))]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.Azure.Extensions",
-        "type": "CustomScript",
-        "typeHandlerVersion": "2.0",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "fileUris": "[parameters('computeNodePostConfigScriptFileUrls')]"
-        },
-        "protectedSettings": {
-          "commandToExecute": "[parameters('computeNodePostConfigScriptCommand')]"
         }
       }
     }

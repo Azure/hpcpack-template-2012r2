@@ -127,6 +127,54 @@
     }
   },
   "variables": {
+    "basicVmssExtension": [
+      {
+        "name": "joinADDomain",
+        "properties": {
+          "publisher": "Microsoft.Compute",
+          "type": "JsonADDomainExtension",
+          "typeHandlerVersion": "1.3",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+            "Name": "[parameters('domainName')]",
+            "User": "[concat(parameters('domainName'), '\\', parameters('adminUsername'))]",
+            "NumberOfRetries": "50",
+            "RetryIntervalInMilliseconds": "10000",
+            "Restart": "true",
+            "Options": "3"
+          },
+          "protectedSettings": {
+            "Password": "[parameters('adminPassword')]"
+          }
+        }
+      }
+    ],
+    "hpcDriverExtension": {
+      "name": "installRDMADriver",
+      "properties": {
+        "publisher": "Microsoft.HpcCompute",
+        "type": "HpcVmDrivers",
+        "typeHandlerVersion": "1.1",
+        "autoUpgradeMinorVersion": true
+      }
+    },
+    "postConfigScriptExtension": {
+      "name": "postConfigScript",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": "[parameters('computeNodePostConfigScriptFileUrls')]"
+        },
+        "protectedSettings": {
+          "commandToExecute": "[if(endsWith(tolower(split(parameters('computeNodePostConfigScriptCommand'), ' ')[0]), '.ps1'), concat('powershell.exe -ExecutionPolicy Unrestricted -File ', parameters('computeNodePostConfigScriptCommand')), parameters('computeNodePostConfigScriptCommand'))]"
+        }
+      }
+    },
+    "midVmssExtensions": "[if(parameters('installRDMADriver'), add(variables('basicVmssExtension'), array(variables('hpcDriverExtension'))), variables('basicVmssExtension'))]",
+    "vmssExtensions": "[if(empty(parameters('computeNodePostConfigScriptCommand')), variables('midVmssExtensions'), add(variables('midVmssExtensions'), array(variables('postConfigScriptExtension'))))]"
   },
   "resources": [
     {
@@ -191,67 +239,8 @@
             ]
           },
           "extensionProfile": {
-            "extensions": [
-              {
-                "name": "joinADDomain",
-                "properties": {
-                  "publisher": "Microsoft.Compute",
-                  "type": "JsonADDomainExtension",
-                  "typeHandlerVersion": "1.3",
-                  "autoUpgradeMinorVersion": true,
-                  "settings": {
-                    "Name": "[parameters('domainName')]",
-                    "User": "[concat(parameters('domainName'), '\\', parameters('adminUsername'))]",
-                    "NumberOfRetries": "50",
-                    "RetryIntervalInMilliseconds": "10000",
-                    "Restart": "true",
-                    "Options": "3"
-                  },
-                  "protectedSettings": {
-                    "Password": "[parameters('adminPassword')]"
-                  }
-                }
-              }
-            ]
+            "extensions": "[variables('vmssExtensions')]"
           }
-        }
-      }
-    },
-    {
-      "condition": "[parameters('installRDMADriver')]",
-      "name": "[concat(parameters('vmssName'),'/installRDMADriver')]",
-      "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
-      "apiVersion": "2018-10-01",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('vmssName'))]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.HpcCompute",
-        "type": "HpcVmDrivers",
-        "typeHandlerVersion": "1.1",
-        "autoUpgradeMinorVersion": true
-      }
-    },
-    {
-      "condition": "[not(empty(parameters('computeNodePostConfigScriptCommand')))]",
-      "name": "[concat(parameters('vmssName'),'/postConfigScript')]",
-      "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
-      "apiVersion": "2018-10-01",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('vmssName'))]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.Compute",
-        "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.9",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "fileUris": "[parameters('computeNodePostConfigScriptFileUrls')]"
-        },
-        "protectedSettings": {
-          "commandToExecute": "[if(endsWith(tolower(split(parameters('computeNodePostConfigScriptCommand'), ' ')[0]), '.ps1'), concat('powershell.exe -ExecutionPolicy Unrestricted -File ', parameters('computeNodePostConfigScriptCommand')), parameters('computeNodePostConfigScriptCommand'))]"
         }
       }
     }
