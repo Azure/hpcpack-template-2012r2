@@ -337,7 +337,7 @@
             "value": "[parameters('computeNodeVMSize')]"
           },
           "osDiskType": {
-            "value": "[parameters('computeNodeOsDiskType')]"
+            "value": "[variables('diskTypes')[parameters('computeNodeOsDiskType')]]"
           },
           "imageReference": {
             "value": "[variables('computeNodeImageRef')]"
