@@ -44,7 +44,7 @@
         "description": "The VM size of the compute nodes, all available VM sizes in Azure can be found at https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
       }
     },
-    "computeNodeDiskType": {
+    "computeNodeOsDiskType": {
       "type": "string",
       "defaultValue": "Standard_HDD",
       "allowedValues": [
@@ -53,7 +53,50 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of compute node VM. Note that Premium_SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+        "description": "The disk type of compute node VM. Note that Premium_SSD only supports some VM sizes."
+      }
+    },
+    "dataDiskCount": {
+      "defaultValue": 0,
+      "allowedValues": [
+        0,
+        1,
+        2,
+        4,
+        8
+      ],
+      "type": "int",
+      "metadata": {
+        "description": "The number of data disk(s) for each compute node."
+      }
+    },
+    "dataDiskSizeInGB": {
+      "defaultValue": 32,
+      "allowedValues": [
+        32,
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096
+      ],
+      "type": "int",
+      "metadata": {
+        "description": "The size in GB of each data disk that is attached to the VM."
+      }
+    },
+    "dataDiskType": {
+      "defaultValue": "Standard_HDD",
+      "allowedValues": [
+        "Standard_HDD",
+        "Standard_SSD",
+        "Premium_SSD"
+      ],
+      "type": "string",
+      "metadata": {
+        "description": "The data disk type. Note that Premium_SSD only supports some VM sizes."
       }
     },
     "domainUsername": {
@@ -126,12 +169,19 @@
       "metadata": {
         "description": "The fully qualified domain name (FQDN) for the existing domain forest in which the HPC cluster will join, for example 'hpc.local'."
       }
+    },
+    "dnsServer": {
+      "type": "string",
+      "metadata": {
+        "description": "The custom DNS server for the compute nodes"
+      }
     }
   },
   "variables": {
-    "storageAccountTypes": {
-      "HDD": "Standard_LRS",
-      "SSD": "Premium_LRS"
+    "diskTypes": {
+      "Standard_HDD": "Standard_LRS",
+      "Standard_SSD": "StandardSSD_LRS",
+      "Premium_SSD": "Premium_LRS"
     },
     "computeNodeImages": {
       "ComputeNode": {
@@ -214,11 +264,20 @@
           "vmSize": {
             "value": "[parameters('computeNodeVMSize')]"
           },
-          "storageAccountType": {
-            "value": "[variables('diskTypes')[parameters('computeNodeDiskType')]]"
+          "osDiskType": {
+            "value": "[variables('diskTypes')[parameters('computeNodeOsDiskType')]]"
           },
           "imageReference": {
             "value": "[variables('computeNodeImageRef')]"
+          },
+          "dataDiskSize": {
+            "value": "[parameters('dataDiskSizeInGB')]"
+          },
+          "dataDiskCount": {
+            "value": "[parameters('dataDiskCount')]"
+          },
+          "dataDiskType": {
+            "value": "[variables('diskTypes')[parameters('dataDiskType')]]"
           },
           "adminUsername": {
             "value": "[parameters('domainUsername')]"
@@ -277,11 +336,20 @@
           "vmSize": {
             "value": "[parameters('computeNodeVMSize')]"
           },
-          "storageAccountType": {
-            "value": "[parameters('computeNodeDiskType')]"
+          "osDiskType": {
+            "value": "[parameters('computeNodeOsDiskType')]"
           },
           "imageReference": {
             "value": "[variables('computeNodeImageRef')]"
+          },
+          "dataDiskSize": {
+            "value": "[parameters('dataDiskSizeInGB')]"
+          },
+          "dataDiskCount": {
+            "value": "[parameters('dataDiskCount')]"
+          },
+          "dataDiskType": {
+            "value": "[variables('diskTypes')[parameters('dataDiskType')]]"
           },
           "adminUsername": {
             "value": "[parameters('domainUsername')]"

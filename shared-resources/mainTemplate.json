@@ -120,7 +120,7 @@
         "description": "The VM size of the head node, all available VM sizes in Azure can be found at https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
       }
     },
-    "headNodeDiskType": {
+    "headNodeOsDiskType": {
       "type": "string",
       "defaultValue": "Premium_LRS",
       "allowedValues": [
@@ -130,6 +130,27 @@
       ],
       "metadata": {
         "description": "The disk type of head node VM. Note that Premium_LRS only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+      }
+    },
+    "headNodeDataDiskSize": {
+      "defaultValue": 128,
+      "type": "int",
+      "metadata": {
+        "description": "The size in GB of each data disk that is attached to the head node VM."
+      }
+    },
+    "headNodeDataDiskCount": {
+      "defaultValue": 0,
+      "type": "int",
+      "metadata": {
+        "description": "The number of data disks attached to the head node VM."
+      }
+    },
+    "headNodeDataDiskType": {
+      "defaultValue": "Standard_LRS",
+      "type": "string",
+      "metadata": {
+        "description": "Head node data disk type"
       }
     },
     "computeNodeImageOsPlatform": {
@@ -173,7 +194,7 @@
         "description": "The VM size of the compute nodes, all available VM sizes in Azure can be found at https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
       }
     },
-    "computeNodeDiskType": {
+    "computeNodeOsDiskType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
       "allowedValues": [
@@ -236,11 +257,18 @@
         "description": "Administrator password for the virtual machines and the Active Directory domain"
       }
     },
-    "enableAcceleratedNetworking": {
+    "headNodeEnableAcceleratedNetworking": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Specify whether to create the Azure VMs with accelerated networking"
+        "description": "Specify whether to create the head node VM with accelerated networking"
+      }
+    },
+    "computeNodeEnableAcceleratedNetworking": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Specify whether to create the compute node VMs with accelerated networking"
       }
     },
     "headNodePostConfigScriptFileUrls": {
@@ -287,6 +315,23 @@
     }
   },
   "variables": {
+    "emptyArray": [],
+    "headNodeDataDisks": {
+      "copy": [
+        {
+          "name": "hnDataDisks",
+          "count": "[if(equals(parameters('headNodeDataDiskCount'), 0), 1, parameters('headNodeDataDiskCount'))]",
+          "input": {
+            "lun": "[copyIndex('hnDataDisks')]",
+            "createOption": "Empty",
+            "diskSizeGB": "[parameters('headNodeDataDiskSize')]",
+            "managedDisk": {
+              "storageAccountType": "[parameters('headNodeDataDiskType')]"
+            }
+          }
+        }
+      ]
+    },
     "defaultSoaStorageAccountName": "[toLower(concat('hpc', uniqueString(resourceGroup().id, toLower(parameters('clusterName')))))]",
     "soaStorageAccountName": "[if(empty(parameters('soaStorageAccountName')), variables('defaultSoaStorageAccountName'), parameters('soaStorageAccountName'))]",
     "soaStorageAccountRGName": "[if(empty(parameters('soaStorageAccountResourceGroupName')), resourceGroup().name, parameters('soaStorageAccountResourceGroupName'))]",
@@ -524,7 +569,7 @@
             }
           }
         ],
-        "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]",
+        "enableAcceleratedNetworking": "[parameters('headNodeEnableAcceleratedNetworking')]",
         "networkSecurityGroup": "[if(not(equals(parameters('publicIPCreateOption'), 'none')), variables('networkSecurityGroupId') , json('null'))]"
       }
     },
@@ -575,21 +620,10 @@
             "caching": "ReadOnly",
             "createOption": "FromImage",
             "managedDisk": {
-              "storageAccountType": "[parameters('headNodeDiskType')]"
+              "storageAccountType": "[parameters('headNodeOsDiskType')]"
             }
           },
-          "dataDisks": [
-            {
-              "name": "[concat(parameters('clusterName'), '-datadisk')]",
-              "caching": "None",
-              "createOption": "Empty",
-              "diskSizeGB": 500,
-              "managedDisk": {
-                "storageAccountType": "[parameters('headNodeDiskType')]"
-              },
-              "lun": 0
-            }
-          ]
+          "dataDisks": "[if(equals(parameters('headNodeDataDiskCount'), 0), variables('emptyArray'), variables('headNodeDataDisks').hnDataDisks)]"
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -781,8 +815,17 @@
           "vmSize": {
             "value": "[parameters('computeNodeVMSize')]"
           },
-          "storageAccountType": {
-            "value": "[parameters('computeNodeDiskType')]"
+          "osDiskType": {
+            "value": "[parameters('computeNodeOsDiskType')]"
+          },
+          "dataDiskSize": {
+            "value": "[parameters('computeNodeDataDiskSize')]"
+          },
+          "dataDiskCount": {
+            "value": "[parameters('computeNodeDataDiskCount')]"
+          },
+          "dataDiskType": {
+            "value": "[parameters('computeNodeDataDiskType')]"
           },
           "imageReference": {
             "value": "[parameters('computeNodeImageRef')]"
@@ -803,7 +846,7 @@
             "value": "[variables('cnInstallRDMADriver')]"
           },
           "enableAcceleratedNetworking": {
-            "value": "[parameters('enableAcceleratedNetworking')]"
+            "value": "[parameters('computeNodeEnableAcceleratedNetworking')]"
           },
           "clusterName": {
             "value": "[parameters('clusterName')]"
@@ -850,8 +893,17 @@
           "vmSize": {
             "value": "[parameters('computeNodeVMSize')]"
           },
-          "storageAccountType": {
-            "value": "[parameters('computeNodeDiskType')]"
+          "osDiskType": {
+            "value": "[parameters('computeNodeOsDiskType')]"
+          },
+          "dataDiskSize": {
+            "value": "[parameters('computeNodeDataDiskSize')]"
+          },
+          "dataDiskCount": {
+            "value": "[parameters('computeNodeDataDiskCount')]"
+          },
+          "dataDiskType": {
+            "value": "[parameters('computeNodeDataDiskType')]"
           },
           "imageReference": {
             "value": "[parameters('computeNodeImageRef')]"
@@ -872,7 +924,7 @@
             "value": "[variables('cnInstallRDMADriver')]"
           },
           "enableAcceleratedNetworking": {
-            "value": "[parameters('enableAcceleratedNetworking')]"
+            "value": "[parameters('computeNodeEnableAcceleratedNetworking')]"
           },
           "clusterName": {
             "value": "[parameters('clusterName')]"

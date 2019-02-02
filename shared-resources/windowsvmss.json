@@ -33,10 +33,30 @@
         "description": "The VM role size"
       }
     },
-    "storageAccountType": {
+    "osDiskType": {
       "type": "string",
       "metadata": {
-        "description": "The storage account type for the disks of the VM"
+        "description": "The OS disk type of the VM"
+      }
+    },
+    "dataDiskSize": {
+      "defaultValue": 128,
+      "type": "int",
+      "metadata": {
+        "description": "The size in GB of each data disk that is attached to the VM."
+      }
+    },
+    "dataDiskCount": {
+      "defaultValue": 0,
+      "type": "int",
+      "metadata": {
+        "description": "The count of data disks attached to the VM."
+      }
+    },
+    "dataDiskType": {
+      "type": "string",
+      "metadata": {
+        "description": "The data disk type of the VM"
       }
     },
     "imageReference": {
@@ -120,6 +140,23 @@
     }
   },
   "variables": {
+    "emptyArray": [],
+    "vmdataDisks": {
+      "copy": [
+        {
+          "name": "dataDisks",
+          "count": "[if(equals(parameters('dataDiskCount'), 0), 1, parameters('dataDiskCount'))]",
+          "input": {
+            "lun": "[copyIndex('dataDisks')]",
+            "createOption": "Empty",
+            "diskSizeGB": "[parameters('dataDiskSize')]",
+            "managedDisk": {
+              "storageAccountType": "[parameters('dataDiskType')]"
+            }
+          }
+        }
+      ]
+    },
     "basicVmssExtension": [
       {
         "name": "joinADDomain",
@@ -188,14 +225,15 @@
         },
         "virtualMachineProfile": {
           "storageProfile": {
+            "imageReference": "[parameters('imageReference')]",
             "osDisk": {
               "caching": "ReadOnly",
               "createOption": "FromImage",
               "managedDisk": {
-                "storageAccountType": "[parameters('storageAccountType')]"
+                "storageAccountType": "[parameters('osDiskType')]"
               }
             },
-            "imageReference": "[parameters('imageReference')]"
+            "dataDisks": "[if(equals(parameters('dataDiskCount'), 0), variables('emptyArray'), variables('vmDataDisks').dataDisks)]"
           },
           "osProfile": {
             "computerNamePrefix": "[parameters('vmssName')]",

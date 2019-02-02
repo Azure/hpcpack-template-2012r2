@@ -41,7 +41,7 @@
         "description": "The VM size of the head node, all available VM sizes in Azure can be found at https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
       }
     },
-    "headNodeDiskType": {
+    "headNodeOsDiskType": {
       "type": "string",
       "defaultValue": "Premium_SSD",
       "allowedValues": [
@@ -50,7 +50,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of head node VM. Note that Premium_SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+        "description": "The disk type of head node VM. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
       }
     },
     "computeNodeImage": {
@@ -88,7 +88,7 @@
         "description": "The VM size of the compute nodes, all available VM sizes in Azure can be found at https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
       }
     },
-    "computeNodeDiskType": {
+    "computeNodeOsDiskType": {
       "type": "string",
       "defaultValue": "Standard_HDD",
       "allowedValues": [
@@ -97,7 +97,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of compute node VM. Note that Premium_SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+        "description": "The disk type of compute node VM. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
       }
     },
     "useVmssForComputeNodes": {
@@ -132,6 +132,92 @@
       "type": "securestring",
       "metadata": {
         "description": "The domain user password, also used as the password of the local administrator user."
+      }
+    },
+    "headNodeDataDiskCount": {
+      "type": "int",
+      "defaultValue": 0,
+      "allowedValues": [
+        0,
+        1,
+        2,
+        4,
+        8
+      ],
+      "metadata": {
+        "description": "The number of data disks attached to the head node VM."
+      }
+    },
+    "headNodeDataDiskSize": {
+      "type": "int",
+      "defaultValue": 128,
+      "allowedValues": [
+        32,
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096
+      ],
+      "metadata": {
+        "description": "The size in GB of each data disk that is attached to the head node VM."
+      }
+    },
+    "headNodeDataDiskType": {
+      "type": "string",
+      "defaultValue": "Standard_HDD",
+      "allowedValues": [
+        "Standard_HDD",
+        "Standard_SSD",
+        "Premium_SSD"
+      ],
+      "metadata": {
+        "description": "Head node data disk type. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
+      }
+    },
+    "computeNodeDataDiskCount": {
+      "type": "int",
+      "defaultValue": 0,
+      "allowedValues": [
+        0,
+        1,
+        2,
+        4,
+        8
+      ],
+      "metadata": {
+        "description": "The number of data disks attached to the compute node VM."
+      }
+    },
+    "computeNodeDataDiskSize": {
+      "type": "int",
+      "defaultValue": 128,
+      "allowedValues": [
+        32,
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096
+      ],
+      "metadata": {
+        "description": "The size in GB of each data disk that is attached to the compute node VM."
+      }
+    },
+    "computeNodeDataDiskType": {
+      "type": "string",
+      "defaultValue": "Standard_HDD",
+      "allowedValues": [
+        "Standard_HDD",
+        "Standard_SSD",
+        "Premium_SSD"
+      ],
+      "metadata": {
+        "description": "Compute node data disk type. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
       }
     },
     "createPublicIPAddressForHeadNode": {
@@ -252,8 +338,8 @@
           "soaStorageAccountCreateOption": {
             "value": "[if(equals(parameters('createStorageAccountForSOA'), 'Yes'), 'new', 'none')]"
           },
-          "headNodeDiskType": {
-            "value": "[variables('diskTypes')[parameters('headNodeDiskType')]]"
+          "headNodeOsDiskType": {
+            "value": "[variables('diskTypes')[parameters('headNodeOsDiskType')]]"
           },
           "headNodeVMSize": {
             "value": "[parameters('headNodeVMSize')]"
@@ -273,8 +359,8 @@
           "computeNodeNumber": {
             "value": "[parameters('computeNodeNumber')]"
           },
-          "computeNodeDiskType": {
-            "value": "[variables('diskTypes')[parameters('computeNodeDiskType')]]"
+          "computeNodeOsDiskType": {
+            "value": "[variables('diskTypes')[parameters('computeNodeOsDiskType')]]"
           },
           "computeNodeVMSize": {
             "value": "[parameters('computeNodeVMSize')]"
@@ -291,7 +377,28 @@
           "adminPassword": {
             "value": "[parameters('domainUserPassword')]"
           },
-          "enableAcceleratedNetworking": {
+          "headNodeDataDiskCount": {
+            "value": "[parameters('headNodeDataDiskCount')]"
+          },
+          "headNodeDataDiskType": {
+            "value": "[variables('diskTypes')[parameters('headNodeDataDiskType')]]"
+          },
+          "headNodeDataDiskSize": {
+            "value": "[parameters('headNodeDataDiskSize')]"
+          },
+          "computeNodeDataDiskCount": {
+            "value": "[parameters('computeNodeDataDiskCount')]"
+          },
+          "computeNodeDataDiskType": {
+            "value": "[variables('diskTypes')[parameters('computeNodeDataDiskType')]]"
+          },
+          "computeNodeDataDiskSize": {
+            "value": "[parameters('computeNodeDataDiskSize')]"
+          },
+          "headNodeEnableAcceleratedNetworking": {
+            "value": "[if(equals(parameters('enableAcceleratedNetworking'), 'Yes'), bool('true'), bool('false'))]"
+          },
+          "computeNodeEnableAcceleratedNetworking": {
             "value": "[if(equals(parameters('enableAcceleratedNetworking'), 'Yes'), bool('true'), bool('false'))]"
           },
           "headNodePostConfigScriptFileUrls": {

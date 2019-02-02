@@ -1,0 +1,831 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "clusterName",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Cluster name",
+        "toolTip": "The HPC Pack cluster name, also used as the host name of the head node.",
+        "defaultValue": "",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z][a-z0-9]{2,14}$",
+          "validationMessage": "Must contain between 3 and 15 characters with lowercase letters and numbers, and must start with a letter."
+        }
+      }
+    ],
+    "steps": [
+      {
+        "name": "headNodeConfig",
+        "label": "Head node settings",
+        "subLabel": {
+          "preValidation": "Configure Head node",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Head node settings",
+        "elements": [
+          {
+            "name": "headNodeVMSize",
+            "type": "Microsoft.Compute.SizeSelector",
+            "label": "VM Size",
+            "toolTip": "VM Size for the head node",
+            "recommendedSizes": [
+              "Standard_D8s_v3",
+              "Standard_DS4_v2",
+              "Standard_DS4",
+              "Standard_F8s",
+              "Standard_A8_v2",
+              "Standard_A4"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Basic_A0",
+                "Basic_A1",
+                "Basic_A2",
+                "Basic_A3",
+                "Basic_A4",
+                "Standard_A0",
+                "Standard_A1",
+                "Standard_A2",
+                "Standard_A5",
+                "Standard_A1_v2",
+                "Standard_A2_v2",
+                "Standard_A2m_v2",
+                "Standard_D1",
+                "Standard_D2",
+                "Standard_D11",
+                "Standard_D1_v2",
+                "Standard_D2_v2",
+                "Standard_D11_v2",
+                "Standard_DS1",
+                "Standard_DS2",
+                "Standard_DS11",
+                "Standard_DS1_v2",
+                "Standard_DS2_v2",
+                "Standard_DS11_v2",
+                "Standard_F1",
+                "Standard_F2",
+                "Standard_F1s",
+                "Standard_F2s",
+                "Standard_G1",
+                "Standard_GS1"
+              ]
+            },
+            "osPlatform": "Windows",
+            "count": 1
+          },
+          {
+            "name": "headNodeOsDiskType1",
+            "type": "Microsoft.Common.DropDown",
+            "label": "OS disk type",
+            "defaultValue": "Premium SSD",
+            "toolTip": "Premium SSD disks offer high-performance, low-latency disk support for I/O-intensive applications and production workloads. To use Premium SSD disks, you must choose VM Size with premium storage support. Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard HDD",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
+                },
+                {
+                  "label": "Premium SSD",
+                  "value": "Premium_LRS"
+                }
+              ]
+            },
+            "visible": "[contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's')]"
+          },
+          {
+            "name": "headNodeOsDiskType2",
+            "type": "Microsoft.Common.DropDown",
+            "label": "OS disk type",
+            "defaultValue": "Standard SSD",
+            "toolTip": "Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard HDD",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
+                }
+              ]
+            },
+            "visible": "[not(contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's'))]"
+          },
+          {
+            "name": "headNodePublicIP",
+            "type": "Microsoft.Network.PublicIpAddressCombo",
+            "label": {
+              "publicIpAddress": "Public IP address",
+              "domainNameLabel": "DNS name label"
+            },
+            "toolTip": {
+              "publicIpAddress": "The public IP address of the head node. The DNS name label of it must be the same as the cluster name if you want to submit SOA jobs from an on-premises machine with HPC Pack client utilities installed.",
+              "domainNameLabel": "The DNS name label of the public IP address. Must be the same as the cluster name if you want to submit SOA jobs from an on-premises machine with HPC Pack client utilities installed."
+            },
+            "defaultValue": {
+              "publicIpAddressName": "[basics('clusterName')]",
+              "domainNameLabel": "[basics('clusterName')]"
+            },
+            "options": {
+              "hideNone": false,
+              "hideDomainNameLabel": false
+            }
+          },
+          {
+            "name": "createDataDisks",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Create Data Disk(s)",
+            "defaultValue": "No",
+            "toolTip": "Specify whether you want to create data disk(s) for the head node",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },
+          {
+            "name": "headNodeDataDisks",
+            "type": "Microsoft.Common.Section",
+            "label": "",
+            "elements": [
+              {
+                "name": "headNodeDataDiskSize",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Size of each data disk",
+                "defaultValue": "128 GB",
+                "toolTip": "The size in GB for each data disk attached to the head node.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "32 GB",
+                      "value": 32
+                    },
+                    {
+                      "label": "64 GB",
+                      "value": 64
+                    },
+                    {
+                      "label": "128 GB",
+                      "value": 128
+                    },
+                    {
+                      "label": "256 GB",
+                      "value": 256
+                    },
+                    {
+                      "label": "512 GB",
+                      "value": 512
+                    },
+                    {
+                      "label": "1 TB",
+                      "value": 1024
+                    },
+                    {
+                      "label": "2 TB",
+                      "value": 2048
+                    },
+                    {
+                      "label": "4 TB",
+                      "value": 4096
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "headNodeDataDiskCount",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Number of data disks",
+                "defaultValue": "1",
+                "toolTip": "The number of data disks attached to the head node. Do not specify a number which exceeds the maximum data disk number of the head node VM Size.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "1",
+                      "value": 1
+                    },
+                    {
+                      "label": "2",
+                      "value": 2
+                    },
+                    {
+                      "label": "4",
+                      "value": 4
+                    },
+                    {
+                      "label": "8",
+                      "value": 8
+                    },
+                    {
+                      "label": "16",
+                      "value": 16
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "headNodeDataDiskType1",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Data disk type",
+                "defaultValue": "Premium SSD",
+                "toolTip": "Premium SSD disks offer high-performance, low-latency disk support for I/O-intensive applications and production workloads. To use Premium SSD disks, you must choose VM Size with premium storage support. Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Standard HDD",
+                      "value": "Standard_LRS"
+                    },
+                    {
+                      "label": "Standard SSD",
+                      "value": "StandardSSD_LRS"
+                    },
+                    {
+                      "label": "Premium SSD",
+                      "value": "Premium_LRS"
+                    }
+                  ]
+                },
+                "visible": "[contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's')]"
+              },
+              {
+                "name": "headNodeDataDiskType2",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Data disk type",
+                "defaultValue": "Standard SSD",
+                "toolTip": "Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Standard HDD",
+                      "value": "Standard_LRS"
+                    },
+                    {
+                      "label": "Standard SSD",
+                      "value": "StandardSSD_LRS"
+                    }
+                  ]
+                },
+                "visible": "[not(contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's'))]"
+              }
+            ],
+            "visible": "[steps('headNodeConfig').createDataDisks]"
+          },
+          {
+            "name": "headNodeEnableAccelNet",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Accelerated networking",
+            "defaultValue": "Off",
+            "toolTip": "Accelerated networking can greatly improve cluster networking performance with lower latency and higher throughput. It is supported only on some VM sizes and operating systems. Turn it on only when the VM image and VM sizes you selected are all compatible. More about accelerated networking see https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-cli",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "On",
+                  "value": true
+                },
+                {
+                  "label": "Off",
+                  "value": false
+                }
+              ]
+            },
+            "visible": "[contains(';D4s_v3;D8s_v3;D16s_v3;D32s_v3;D64s_v3;D4_v3;D8_v3;D16_v3;D32_v3;D64_v3;D2_v2;D3_v2;D4_v2;D5_v2;D11_v2;D12_v2;D13_v2;D14_v2;D15_v2;DS2_v2;DS3_v2;DS4_v2;DS5_v2;DS11_v2;DS12_v2;DS13_v2;DS14_v2;DS15_v2;F2;F4;F8;F16;F2;F4;F8;F16;F2s;F4s;F8s;F16s;F4s_v2;F8s_v2;F16s_v2;F32s_v2;F64s_v2;F72s_v2;E4_v3;E8_v3;E16_v3;E20_v3;E32_v3;E64_v3;E64i_v3;E4s_v3;E8s_v3;E16s_v3;E20s_v3;E32s_v3;E64s_v3;E64is_v3;M8ms;M16ms;M32ts;M32ls;M32ms;M64s;M64ls;M64ms;M128s;M128ms', replace(coalesce(steps('headNodeConfig').headNodeVMSize, 'None'), 'Standard_', ';'))]"
+          },
+          {
+            "name": "hnelement1",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "Some file upload",
+            "toolTip": "",
+            "constraints": {
+              "required": false,
+              "accept": ".ps1"
+            },
+            "options": {
+              "multiple": true,
+              "uploadMode": "url",
+              "openMode": "binary"
+            },
+            "visible": true
+          },
+          {
+            "name": "headNodePostConfigScript",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Post-configuration script URL",
+            "toolTip": "Optional URL of a public available PowerShell script you want to run on the head node after it is configured. The script will be run as the Local System account. You can also specify arguments for the script, for example 'http://www.contoso.com/myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'.",
+            "defaultValue": "",
+            "constraints": {
+              "required": false,
+              "regex": "^\\s*(https?://.+/[^/]+\\.ps1(\\s+\\S*)*)?$",
+              "validationMessage": "Must be HTTP or HTTPS URL and only PowerShell script is supported."
+            }
+          }
+        ]
+      },
+      {
+        "name": "computeNodeConfig",
+        "label": "Compute node settings",
+        "subLabel": {
+          "preValidation": "Configure compute nodes",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Compute node settings",
+        "elements": [
+          {
+            "name": "computeNodeNamePrefix",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Name prefix",
+            "toolTip": "The name prefix of the compute nodes. For example, if 'IaaSCN' is specified, the compute node names will be 'IaaSCN000', 'IaaSCN001', ...",
+            "defaultValue": "HPCIaaSCN",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-zA-Z][a-zA-Z0-9-]{1,11}$",
+              "validationMessage": "Must be no more than 12 characters, begin with a letter, and contain only letters, numbers and hyphens"
+            }
+          },
+          {
+            "name": "computeNodeNumber",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Number of compute nodes",
+            "toolTip": "The number of compute nodes to be created",
+            "defaultValue": "10",
+            "constraints": {
+              "required": true,
+              "regex": "^[1-9][0-9]{0,2}$",
+              "validationMessage": "Must be an integer between 1 and 999."
+            }
+          },
+          {
+            "name": "computeNodeVMSize",
+            "type": "Microsoft.Compute.SizeSelector",
+            "label": "VM Size",
+            "toolTip": "VM size for the compute nodes",
+            "recommendedSizes": [
+              "Standard_D4_v3",
+              "Standard_D3_v2",
+              "Standard_D3",
+              "Standard_F4",
+              "Standard_A4_v2",
+              "Standard_A3"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Basic_A0",
+                "Basic_A1",
+                "Basic_A2",
+                "Basic_A3",
+                "Basic_A4",
+                "Standard_A0",
+                "Standard_A1"
+              ]
+            },
+            "osPlatform": "Windows",
+            "count": "[steps('computeNodeConfig').computeNodeNumber]"
+          },
+          {
+            "name": "computeNodeOsDiskType1",
+            "type": "Microsoft.Common.DropDown",
+            "label": "OS disk type",
+            "defaultValue": "Premium SSD",
+            "toolTip": "Premium SSD disks offer high-performance, low-latency disk support for I/O-intensive applications and production workloads. To use Premium SSD disks, you must choose VM Size with premium storage support. Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard HDD",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
+                },
+                {
+                  "label": "Premium SSD",
+                  "value": "Premium_LRS"
+                }
+              ]
+            },
+            "visible": "[contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's')]"
+          },
+          {
+            "name": "computeNodeOsDiskType2",
+            "type": "Microsoft.Common.DropDown",
+            "label": "OS disk type",
+            "defaultValue": "Standard SSD",
+            "toolTip": "Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard HDD",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
+                }
+              ]
+            },
+            "visible": "[not(contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's'))]"
+          },
+          {
+            "name": "createDataDisks",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Create Data Disk(s)",
+            "defaultValue": "No",
+            "toolTip": "Specify whether you want to create data disk(s) for the compute nodes",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },
+          {
+            "name": "computeNodeDataDisks",
+            "type": "Microsoft.Common.Section",
+            "label": "",
+            "elements": [
+              {
+                "name": "computeNodeDataDiskSize",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Size of each data disk",
+                "defaultValue": "128 GB",
+                "toolTip": "The size in GB for each data disk attached to compute nodes.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "32 GB",
+                      "value": 32
+                    },
+                    {
+                      "label": "64 GB",
+                      "value": 64
+                    },
+                    {
+                      "label": "128 GB",
+                      "value": 128
+                    },
+                    {
+                      "label": "256 GB",
+                      "value": 256
+                    },
+                    {
+                      "label": "512 GB",
+                      "value": 512
+                    },
+                    {
+                      "label": "1 TB",
+                      "value": 1024
+                    },
+                    {
+                      "label": "2 TB",
+                      "value": 2048
+                    },
+                    {
+                      "label": "4 TB",
+                      "value": 4096
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "computeNodeDataDiskCount",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Number of data disks for each node",
+                "defaultValue": "1",
+                "toolTip": "The number of data disks attached to each compute node. Do not specify a number which exceeds the maximum data disk number of the compute node VM Size.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "1",
+                      "value": 1
+                    },
+                    {
+                      "label": "2",
+                      "value": 2
+                    },
+                    {
+                      "label": "4",
+                      "value": 4
+                    },
+                    {
+                      "label": "8",
+                      "value": 8
+                    },
+                    {
+                      "label": "16",
+                      "value": 16
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "computeNodeDataDiskType1",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Data disk type",
+                "defaultValue": "Standard HDD",
+                "toolTip": "Premium SSD disks offer high-performance, low-latency disk support for I/O-intensive applications and production workloads. To use Premium SSD disks, you must choose VM Size with premium storage support. Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Standard HDD",
+                      "value": "Standard_LRS"
+                    },
+                    {
+                      "label": "Standard SSD",
+                      "value": "StandardSSD_LRS"
+                    },
+                    {
+                      "label": "Premium SSD",
+                      "value": "Premium_LRS"
+                    }
+                  ]
+                },
+                "visible": "[contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's')]"
+              },
+              {
+                "name": "computeNodeDataDiskType2",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Data disk type",
+                "defaultValue": "Standard HDD",
+                "toolTip": "Standard SSD Disks are a cost effective storage option optimized for workloads that need consistent performance at lower IOPS levels. Use Standard HDD disks for Dev/Test scenarios and less critical workloads at lowest cost.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Standard HDD",
+                      "value": "Standard_LRS"
+                    },
+                    {
+                      "label": "Standard SSD",
+                      "value": "StandardSSD_LRS"
+                    }
+                  ]
+                },
+                "visible": "[not(contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's'))]"
+              }
+            ],
+            "visible": "[steps('computeNodeConfig').createDataDisks]"
+          },
+          {
+            "name": "computeNodeEnableAccelNet",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Accelerated networking",
+            "defaultValue": "Off",
+            "toolTip": "Accelerated networking can greatly improve cluster networking performance with lower latency and higher throughput. It is supported only on some VM sizes and operating systems. Turn it on only when the VM image and VM sizes you selected are all compatible. More about accelerated networking see https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-cli",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "On",
+                  "value": true
+                },
+                {
+                  "label": "Off",
+                  "value": false
+                }
+              ]
+            },
+            "visible": "[contains(';D4s_v3;D8s_v3;D16s_v3;D32s_v3;D64s_v3;D4_v3;D8_v3;D16_v3;D32_v3;D64_v3;D2_v2;D3_v2;D4_v2;D5_v2;D11_v2;D12_v2;D13_v2;D14_v2;D15_v2;DS2_v2;DS3_v2;DS4_v2;DS5_v2;DS11_v2;DS12_v2;DS13_v2;DS14_v2;DS15_v2;F2;F4;F8;F16;F2;F4;F8;F16;F2s;F4s;F8s;F16s;F4s_v2;F8s_v2;F16s_v2;F32s_v2;F64s_v2;F72s_v2;E4_v3;E8_v3;E16_v3;E20_v3;E32_v3;E64_v3;E64i_v3;E4s_v3;E8s_v3;E16s_v3;E20s_v3;E32s_v3;E64s_v3;E64is_v3;M8ms;M16ms;M32ts;M32ls;M32ms;M64s;M64ls;M64ms;M128s;M128ms', replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, 'None'), 'Standard_', ';'))]"
+          },
+          {
+            "name": "computeNodeAsVMSS",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Use VM scale set (Experimental)",
+            "defaultValue": "No",
+            "toolTip": "It is an experimental feature to create the compute nodes as VM scale set. Some HPC features may not work if you use this feature",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },
+          {
+            "name": "computeNodePostConfigScript",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Post-configuration script URL",
+            "toolTip": "Optional URL of a public available PowerShell script you want to run on the compute nodes after they are configured. The script will be run as the Local System account. You can also specify arguments for the script, for example 'http://www.contoso.com/mycnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'.",
+            "defaultValue": "",
+            "constraints": {
+              "required": false,
+              "regex": "^\\s*(https?://.+/[^/]+\\.ps1(\\s+\\S*)*)?$",
+              "validationMessage": "Must be HTTP or HTTPS URL and only PowerShell script is supported."
+            }
+          }
+        ]
+      },
+      {
+        "name": "infrastructureConfig",
+        "label": "Infrastructure settings",
+        "subLabel": {
+          "preValidation": "Configure the infrastructure settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Infrastructure settings",
+        "elements": [
+          {
+            "name": "virtualNetwork",
+            "type": "Microsoft.Network.VirtualNetworkCombo",
+            "label": {
+              "virtualNetwork": "Virtual network",
+              "subnets": "Subnets"
+            },
+            "toolTip": {
+              "virtualNetwork": "The virtual network in which the virtual machines will be deployed. If you choose an existing virtual network, make sure a domain forest was already created before the deployment, or the deployment will fail.",
+              "subnets": "The subnet in which the virtual machines will be deployed"
+            },
+            "defaultValue": {
+              "name": "[concat(basics('clusterName'), 'VNet')]",
+              "addressPrefixSize": "/16"
+            },
+            "constraints": {
+              "minAddressPrefixSize": "/24"
+            },
+            "options": {
+              "hideExisting": false
+            },
+            "subnets": {
+              "subnet1": {
+                "label": "Subnet",
+                "defaultValue": {
+                  "name": "Subnet-1",
+                  "addressPrefixSize": "/22"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/24",
+                  "minAddressCount": "[add(1, steps('computeNodeConfig').computeNodeNumber)]",
+                  "requireContiguousAddresses": true
+                }
+              }
+            },
+            "visible": true
+          },
+          {
+            "name": "newVNetText",
+            "type": "Microsoft.Common.TextBlock",
+            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, ''), 'new')]",
+            "options": {
+              "text": "HPC Pack 2012 R2 relies on Active Directory Domain Services for user and computer authentication. A new AD domain will be created by promoting the head node as domain controller."
+            }
+          },
+          {
+            "name": "existingVNetText",
+            "type": "Microsoft.Common.TextBlock",
+            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, ''), 'existing')]",
+            "options": {
+              "text": "HPC Pack 2012 R2 relies on Active Directory Domain Services for user and computer authentication. Select \"Join existing AD domain\" if an AD domain already exists in the virtual network, or select \"Create a new AD domain\" to promote the head node as domain controller."
+            }
+          },
+          {
+            "name": "domainOption",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Active Directory domain",
+            "toolTip": "HPC Pack 2012 R2 relies on Active Directory Domain Services for user and computer authentication. All the HPC nodes with Windows operating system must be domain joined. You can either create a new AD domain for the cluster or join the cluster into an existing AD domain. <br />If you select \"Create a new AD domain\", the head node will be promoted as domain controller.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Create a new AD domain",
+                  "value": "new"
+                },
+                {
+                  "label": "Join existing AD domain",
+                  "value": "existing"
+                }
+              ],
+              "required": true
+            },
+            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, 'new'), 'existing')]"
+          },
+          {
+            "name": "privateDomainName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Forest root domain name",
+            "toolTip": "The fully qualified domain name (FQDN) for the private domain forest in which the virtual machines will join, for example, 'hpc.local'. If you choose an existing AD domain, make sure it was already created before the deployment.",
+            "defaultValue": "hpc.local",
+            "constraints": {
+              "required": true,
+              "regex": "^([a-z0-9]+\\.)?([a-z0-9][a-z0-9-]*\\.)+[a-z]{2,6}$",
+              "validationMessage": "Must be a valid fully-qualified domain name."
+            }
+          },
+          {
+            "name": "adminUsername",
+            "type": "Microsoft.Compute.UserNameTextBox",
+            "label": "Username",
+            "toolTip": "Local administrator username for the virtual machines as well as the domain user name.",
+            "constraints": {
+              "required": true
+            },
+            "osPlatform": "Windows"
+          },
+          {
+            "name": "adminPassword",
+            "type": "Microsoft.Compute.CredentialsCombo",
+            "label": {
+              "password": "Password",
+              "confirmPassword": "Confirm password"
+            },
+            "toolTip": {
+              "password": "Local administrator password as well as the domain user password."
+            },
+            "osPlatform": "Windows",
+            "constraints": {
+              "required": true
+            }
+          },
+          {
+            "name": "soaStorageAccount",
+            "type": "Microsoft.Storage.StorageAccountSelector",
+            "label": "Storage account for SOA",
+            "toolTip": "The storage account for SOA common data and SOA session monitoring features",
+            "defaultValue": {
+              "name": "storageaccount01",
+              "type": "Standard_LRS"
+            },
+            "constraints": {
+              "allowedTypes": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_ZRS"
+              ]
+            },
+            "options": {
+              "hideExisting": false
+            },
+            "visible": true
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "clusterName": "[basics('clusterName')]",
+      "location": "[location()]",
+      "virtualNetworkResourceGroupName": "[steps('infrastructureConfig').virtualNetwork.resourceGroup]",
+      "virtualNetworkName": "[steps('infrastructureConfig').virtualNetwork.name]",
+      "virtualNetworkAddressPrefix": "[first(steps('infrastructureConfig').virtualNetwork.addressPrefixes)]",
+      "newOrExistingDomainForest": "[steps('infrastructureConfig').virtualNetwork.newOrExisting]",
+      "subnetName": "[steps('infrastructureConfig').virtualNetwork.subnets.subnet1.name]",
+      "subnetAddressPrefix": "[steps('infrastructureConfig').virtualNetwork.subnets.subnet1.addressPrefix]",
+      "subnetStartAddress": "[steps('infrastructureConfig').virtualNetwork.subnets.subnet1.startAddress]",
+      "domainName": "[steps('infrastructureConfig').privateDomainName]",
+      "adminUsername": "[steps('infrastructureConfig').adminUsername]",
+      "adminPassword": "[steps('infrastructureConfig').adminPassword.password]",
+      "soaStorageAccountCreateOption": "[steps('infrastructureConfig').soaStorageAccount.newOrExisting]",
+      "soaStorageAccountRGName": "[steps('infrastructureConfig').soaStorageAccount.resourceGroup]",
+      "soaStorageAccountName": "[steps('infrastructureConfig').soaStorageAccount.name]",
+      "soaStorageAccountType": "[steps('infrastructureConfig').soaStorageAccount.type]",
+      "publicIPName": "[coalesce(steps('headNodeConfig').headNodePublicIP.name, '')]",
+      "publicIPRGName": "[coalesce(steps('headNodeConfig').headNodePublicIP.resourceGroup, '')]",
+      "publicIPCreateOption": "[steps('headNodeConfig').headNodePublicIP.newOrExistingOrNone]",
+      "publicIPDNSNameLabel": "[coalesce(steps('headNodeConfig').headNodePublicIP.domainNameLabel, '')]",
+      "headNodeVMSize": "[steps('headNodeConfig').headNodeVMSize]",
+      "headNodeOsDiskType": "[coalesce(steps('headNodeConfig').headNodeOsDiskType1, steps('headNodeConfig').headNodeOsDiskType2)]",
+      "headNodeDataDiskSize": "[steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskSize]",
+      "headNodeDataDiskType": "[coalesce(steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskType1, steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskType2)]",
+      "headNodeDataDiskCount": "[steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskCount]",
+      "headNodeElement1": "[steps('headNodeConfig').hnelement1]",
+      "headNodePostConfigScript": "[coalesce(steps('headNodeConfig').headNodePostConfigScript, '')]",
+      "computeNodeImageOsPlatform": "Windows",
+      "computeNodeImageRef": {
+        "publisher": "MicrosoftWindowsServerHPCPack",
+        "offer": "WindowsServerHPCPack",
+        "sku": "2012R2CN",
+        "version": "latest"
+      },
+      "computeNodeNamePrefix": "[steps('computeNodeConfig').computeNodeNamePrefix]",
+      "computeNodeNumber": "[int(steps('computeNodeConfig').computeNodeNumber)]",
+      "computeNodeDiskType": "[steps('headNodeConfig').computeNodeDiskType]",
+      "computeNodeVMSize": "[steps('computeNodeConfig').computeNodeVMSize]",
+      "computeNodeOsDiskType": "[coalesce(steps('computeNodeConfig').computeNodeOsDiskType1, steps('computeNodeConfig').computeNodeOsDiskType2)]",
+      "computeNodeDataDiskSize": "[steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskSize]",
+      "computeNodeDataDiskCount": "[steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskCount]",
+      "computeNodeDataDiskType": "[coalesce(steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskType1, steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskType2)]",
+      "useVmssForComputeNodes": "[steps('computeNodeConfig').computeNodeAsVMSS]",
+      "computeNodePostConfigScript": "[coalesce(steps('computeNodeConfig').computeNodePostConfigScript, '')]"
+    }
+  }
+}
