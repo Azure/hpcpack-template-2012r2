@@ -33,7 +33,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of head node VM. Note that Premium_SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+        "description": "The disk type of head node VM. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
       }
     },
     "computeNodeImage": {
@@ -80,7 +80,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of compute node VM. Note that Premium_SSD only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
+        "description": "The disk type of compute node VM. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
       }
     },
     "useVmssForComputeNodes": {

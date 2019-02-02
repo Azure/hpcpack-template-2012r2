@@ -53,7 +53,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of compute node VM. Note that Premium_SSD only supports some VM sizes."
+        "description": "The disk type of compute node VM. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes."
       }
     },
     "dataDiskCount": {
@@ -96,7 +96,7 @@
       ],
       "type": "string",
       "metadata": {
-        "description": "The data disk type. Note that Premium_SSD only supports some VM sizes."
+        "description": "The data disk type. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes."
       }
     },
     "domainUsername": {
