@@ -206,6 +206,27 @@
         "description": "The disk type of head node VM. Note that Premium_LRS only supports DS-series, DSv2-series, GS-series, and Fs-series VMs."
       }
     },
+    "computeNodeDataDiskSize": {
+      "defaultValue": 128,
+      "type": "int",
+      "metadata": {
+        "description": "The size in GB of each data disk that is attached to the compute node VM."
+      }
+    },
+    "computeNodeDataDiskCount": {
+      "defaultValue": 0,
+      "type": "int",
+      "metadata": {
+        "description": "The number of data disks attached to the compute node VM."
+      }
+    },
+    "computeNodeDataDiskType": {
+      "defaultValue": "Standard_LRS",
+      "type": "string",
+      "metadata": {
+        "description": "Compute node data disk type"
+      }
+    },
     "useVmssForComputeNodes": {
       "type": "bool",
       "defaultValue": false,
