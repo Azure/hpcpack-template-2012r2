@@ -258,14 +258,14 @@
         "description": "Optional, the command line to run the head node post-config script. The script will be run as the Local System account. For example 'myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
       }
     },
-    "computeNodePostConfigScriptFileUrls": {
+    "computeNodeCustomScriptFileUrls": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
         "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. Split with a single space (' ') for multiple URLs. The script will be run as the Local System account (or root for Linux nodes)."
       }
     },
-    "computeNodePostConfigScriptCommand": {
+    "computeNodeCustomScriptCommand": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
@@ -276,7 +276,7 @@
   "variables": {
     "emptyArray": [],
     "headNodePostConfigScriptFileUrls": "[if(empty(trim(parameters('headNodePostConfigScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('headNodePostConfigScriptFileUrls')), ' '))]",
-    "computeNodePostConfigScriptFileUrls": "[if(empty(trim(parameters('computeNodePostConfigScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('computeNodePostConfigScriptFileUrls')), ' '))]",
+    "computeNodeCustomScriptFileUrls": "[if(empty(trim(parameters('computeNodeCustomScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('computeNodeCustomScriptFileUrls')), ' '))]",
     "virtualNetworkName": "[concat(parameters('clusterName'), 'VNet')]",
     "subnetName": "Subnet-1",
     "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources/",
@@ -539,11 +539,11 @@
           "headNodePostConfigScriptCommand": {
             "value": "[trim(parameters('headNodePostConfigScriptCommand'))]"
           },
-          "computeNodePostConfigScriptFileUrls": {
-            "value": "[variables('computeNodePostConfigScriptFileUrls')]"
+          "computeNodeCustomScriptFileUrls": {
+            "value": "[variables('computeNodeCustomScriptFileUrls')]"
           },
-          "computeNodePostConfigScriptCommand": {
-            "value": "[trim(parameters('computeNodePostConfigScriptCommand'))]"
+          "computeNodeCustomScriptCommand": {
+            "value": "[trim(parameters('computeNodeCustomScriptCommand'))]"
           },
           "_artifactsLocation": {
             "value": "[variables('artifactsBaseUrl')]"

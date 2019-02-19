@@ -266,6 +266,20 @@
         "description": "The DNS name label of the public IP address, used only when 'publicIPCreateOption' is specified as 'new'"
       }
     },
+    "publicIPSku": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "metadata": {
+        "description": "The sku of the public IP address, used only when 'publicIPCreateOption' is specified as 'new'"
+      }
+    },
+    "publicIPAllocationMethod": {
+      "type": "string",
+      "defaultValue": "Dynamic",
+      "metadata": {
+        "description": "The public IP allocation method of the public IP address, used only when 'publicIPCreateOption' is specified as 'new'"
+      }
+    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -306,14 +320,14 @@
         "description": "Optional, the command line to run the head node post-config script. The script will be run as the Local System account. For example 'myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
       }
     },
-    "computeNodePostConfigScriptFileUrls": {
+    "computeNodeCustomScriptFileUrls": {
       "type": "array",
       "defaultValue": [],
       "metadata": {
         "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. The script will be run as the Local System account (or root for Linux nodes)."
       }
     },
-    "computeNodePostConfigScriptCommand": {
+    "computeNodeCustomScriptCommand": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
@@ -561,8 +575,11 @@
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('publicIPSku')]"
+      },
       "properties": {
-        "publicIPAllocationMethod": "Dynamic",
+        "publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]",
         "dnsSettings": {
           "domainNameLabel": "[variables('publicIPDNSNameLabel')]"
         }
@@ -875,11 +892,11 @@
           "domainName": {
             "value": "[parameters('domainName')]"
           },
-          "computeNodePostConfigScriptFileUrls": {
-            "value": "[parameters('computeNodePostConfigScriptFileUrls')]"
+          "computeNodeCustomScriptFileUrls": {
+            "value": "[parameters('computeNodeCustomScriptFileUrls')]"
           },
-          "computeNodePostConfigScriptCommand": {
-            "value": "[trim(parameters('computeNodePostConfigScriptCommand'))]"
+          "computeNodeCustomScriptCommand": {
+            "value": "[trim(parameters('computeNodeCustomScriptCommand'))]"
           }
         }
       }
@@ -953,11 +970,11 @@
           "domainName": {
             "value": "[parameters('domainName')]"
           },
-          "computeNodePostConfigScriptFileUrls": {
-            "value": "[parameters('computeNodePostConfigScriptFileUrls')]"
+          "computeNodeCustomScriptFileUrls": {
+            "value": "[parameters('computeNodeCustomScriptFileUrls')]"
           },
-          "computeNodePostConfigScriptCommand": {
-            "value": "[trim(parameters('computeNodePostConfigScriptCommand'))]"
+          "computeNodeCustomScriptCommand": {
+            "value": "[trim(parameters('computeNodeCustomScriptCommand'))]"
           }
         }
       }

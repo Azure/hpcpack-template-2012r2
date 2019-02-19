@@ -124,14 +124,14 @@
         "description": "The fully qualified domain name (FQDN) for the domain forest in which the cluster is created, for example 'hpc.local'."
       }
     },
-    "computeNodePostConfigScriptFileUrls": {
+    "computeNodeCustomScriptFileUrls": {
       "type": "array",
       "defaultValue": [],
       "metadata": {
         "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. The script will be run as the Local System account (or root for Linux nodes)."
       }
     },
-    "computeNodePostConfigScriptCommand": {
+    "computeNodeCustomScriptCommand": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
@@ -179,14 +179,14 @@
         "typeHandlerVersion": "2.0",
         "autoUpgradeMinorVersion": true,
         "settings": {
-          "fileUris": "[parameters('computeNodePostConfigScriptFileUrls')]"
+          "fileUris": "[parameters('computeNodeCustomScriptFileUrls')]"
         },
         "protectedSettings": {
-          "commandToExecute": "[parameters('computeNodePostConfigScriptCommand')]"
+          "commandToExecute": "[parameters('computeNodeCustomScriptCommand')]"
         }
       }
     },
-    "vmssExtensions": "[if(empty(parameters('computeNodePostConfigScriptCommand')), variables('basicVmssExtension'), concat(variables('basicVmssExtension'), array(variables('postConfigScriptExtension'))))]"
+    "vmssExtensions": "[if(empty(parameters('computeNodeCustomScriptCommand')), variables('basicVmssExtension'), concat(variables('basicVmssExtension'), array(variables('postConfigScriptExtension'))))]"
   },
   "resources": [
     {

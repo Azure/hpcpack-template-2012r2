@@ -28,7 +28,7 @@
         "bladeTitle": "Head node settings",
         "elements": [
           {
-            "name": "headNodeVMSize",
+            "name": "vmSize",
             "type": "Microsoft.Compute.SizeSelector",
             "label": "VM Size",
             "toolTip": "VM Size for the head node",
@@ -78,7 +78,7 @@
             "count": 1
           },
           {
-            "name": "headNodeOsDiskType1",
+            "name": "osDiskType1",
             "type": "Microsoft.Common.DropDown",
             "label": "OS disk type",
             "defaultValue": "Premium SSD",
@@ -99,10 +99,10 @@
                 }
               ]
             },
-            "visible": "[contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's')]"
+            "visible": "[contains(toLower(replace(coalesce(steps('headNodeConfig').vmSize, ''), 'Standard_', '')), 's')]"
           },
           {
-            "name": "headNodeOsDiskType2",
+            "name": "osDiskType2",
             "type": "Microsoft.Common.DropDown",
             "label": "OS disk type",
             "defaultValue": "Standard SSD",
@@ -119,10 +119,10 @@
                 }
               ]
             },
-            "visible": "[not(contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's'))]"
+            "visible": "[not(contains(toLower(replace(coalesce(steps('headNodeConfig').vmSize, ''), 'Standard_', '')), 's'))]"
           },
           {
-            "name": "headNodePublicIP",
+            "name": "publicIP",
             "type": "Microsoft.Network.PublicIpAddressCombo",
             "label": {
               "publicIpAddress": "Public IP address",
@@ -133,7 +133,7 @@
               "domainNameLabel": "The DNS name label of the public IP address. Must be the same as the cluster name if you want to submit SOA jobs from an on-premises machine with HPC Pack client utilities installed."
             },
             "defaultValue": {
-              "publicIpAddressName": "[basics('clusterName')]",
+              "publicIpAddressName": "[concat(basics('clusterName'), 'publicIp')]",
               "domainNameLabel": "[basics('clusterName')]"
             },
             "options": {
@@ -161,16 +161,16 @@
             }
           },
           {
-            "name": "headNodeDataDisks",
+            "name": "dataDisks",
             "type": "Microsoft.Common.Section",
-            "label": "",
+            "label": "Data Disk Settings",
             "elements": [
               {
-                "name": "headNodeDataDiskSize",
+                "name": "diskSize",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Size of each data disk",
                 "defaultValue": "128 GB",
-                "toolTip": "The size in GB for each data disk attached to the head node.",
+                "toolTip": "The size for each data disk attached to the head node.",
                 "constraints": {
                   "allowedValues": [
                     {
@@ -209,7 +209,7 @@
                 }
               },
               {
-                "name": "headNodeDataDiskCount",
+                "name": "diskCount",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Number of data disks",
                 "defaultValue": "1",
@@ -240,7 +240,7 @@
                 }
               },
               {
-                "name": "headNodeDataDiskType1",
+                "name": "diskType1",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Data disk type",
                 "defaultValue": "Premium SSD",
@@ -261,10 +261,10 @@
                     }
                   ]
                 },
-                "visible": "[contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's')]"
+                "visible": "[contains(toLower(replace(coalesce(steps('headNodeConfig').vmSize, ''), 'Standard_', '')), 's')]"
               },
               {
-                "name": "headNodeDataDiskType2",
+                "name": "diskType2",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Data disk type",
                 "defaultValue": "Standard SSD",
@@ -281,13 +281,13 @@
                     }
                   ]
                 },
-                "visible": "[not(contains(toLower(replace(coalesce(steps('headNodeConfig').headNodeVMSize, ''), 'Standard_', '')), 's'))]"
+                "visible": "[not(contains(toLower(replace(coalesce(steps('headNodeConfig').vmSize, ''), 'Standard_', '')), 's'))]"
               }
             ],
             "visible": "[steps('headNodeConfig').createDataDisks]"
           },
           {
-            "name": "headNodeEnableAccelNet",
+            "name": "enableAccelNet",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Accelerated networking",
             "defaultValue": "Off",
@@ -304,35 +304,60 @@
                 }
               ]
             },
-            "visible": "[contains(';D4s_v3;D8s_v3;D16s_v3;D32s_v3;D64s_v3;D4_v3;D8_v3;D16_v3;D32_v3;D64_v3;D2_v2;D3_v2;D4_v2;D5_v2;D11_v2;D12_v2;D13_v2;D14_v2;D15_v2;DS2_v2;DS3_v2;DS4_v2;DS5_v2;DS11_v2;DS12_v2;DS13_v2;DS14_v2;DS15_v2;F2;F4;F8;F16;F2;F4;F8;F16;F2s;F4s;F8s;F16s;F4s_v2;F8s_v2;F16s_v2;F32s_v2;F64s_v2;F72s_v2;E4_v3;E8_v3;E16_v3;E20_v3;E32_v3;E64_v3;E64i_v3;E4s_v3;E8s_v3;E16s_v3;E20s_v3;E32s_v3;E64s_v3;E64is_v3;M8ms;M16ms;M32ts;M32ls;M32ms;M64s;M64ls;M64ms;M128s;M128ms', replace(coalesce(steps('headNodeConfig').headNodeVMSize, 'None'), 'Standard_', ';'))]"
+            "visible": "[contains(';D4s_v3;D8s_v3;D16s_v3;D32s_v3;D64s_v3;D4_v3;D8_v3;D16_v3;D32_v3;D64_v3;D2_v2;D3_v2;D4_v2;D5_v2;D11_v2;D12_v2;D13_v2;D14_v2;D15_v2;DS2_v2;DS3_v2;DS4_v2;DS5_v2;DS11_v2;DS12_v2;DS13_v2;DS14_v2;DS15_v2;F2;F4;F8;F16;F2;F4;F8;F16;F2s;F4s;F8s;F16s;F4s_v2;F8s_v2;F16s_v2;F32s_v2;F64s_v2;F72s_v2;E4_v3;E8_v3;E16_v3;E20_v3;E32_v3;E64_v3;E64i_v3;E4s_v3;E8s_v3;E16s_v3;E20s_v3;E32s_v3;E64s_v3;E64is_v3;M8ms;M16ms;M32ts;M32ls;M32ms;M64s;M64ls;M64ms;M128s;M128ms', replace(coalesce(steps('headNodeConfig').vmSize, 'None'), 'Standard_', ';'))]"
           },
           {
-            "name": "hnelement1",
-            "type": "Microsoft.Common.FileUpload",
-            "label": "Some file upload",
-            "toolTip": "",
+            "name": "runCustomScript",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Run custom script",
+            "defaultValue": "No",
+            "toolTip": "Specify whether you want to run custom script on the head node after it is configured.",
             "constraints": {
-              "required": false,
-              "accept": ".ps1"
-            },
-            "options": {
-              "multiple": true,
-              "uploadMode": "url",
-              "openMode": "binary"
-            },
-            "visible": true
-          },
-          {
-            "name": "headNodePostConfigScript",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Post-configuration script URL",
-            "toolTip": "Optional URL of a public available PowerShell script you want to run on the head node after it is configured. The script will be run as the Local System account. You can also specify arguments for the script, for example 'http://www.contoso.com/myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'.",
-            "defaultValue": "",
-            "constraints": {
-              "required": false,
-              "regex": "^\\s*(https?://.+/[^/]+\\.ps1(\\s+\\S*)*)?$",
-              "validationMessage": "Must be HTTP or HTTPS URL and only PowerShell script is supported."
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
             }
+          },
+          {
+            "name": "customScript",
+            "type": "Microsoft.Common.Section",
+            "label": "Custom Script Settings",
+            "elements": [
+              {
+                "name": "scriptFileUrls",
+                "type": "Microsoft.Common.FileUpload",
+                "label": "Upload script file(s)",
+                "toolTip": "Upload one or more script files, the script files will be stored in a Microsoft provided temporary location and get purged after 24 hours.",
+                "constraints": {
+                  "required": false,
+                  "accept": ".ps1"
+                },
+                "options": {
+                  "multiple": true,
+                  "uploadMode": "url",
+                  "openMode": "binary"
+                },
+                "visible": true
+              },
+              {
+                "name": "scriptCommandLine",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Command line to run",
+                "toolTip": "The command line to run the custom script. The script will be run with Local System account. You can also specify arguments for the script, for example \"myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2\".",
+                "defaultValue": "",
+                "constraints": {
+                  "required": true
+                }
+              }
+            ],
+            "visible": "[steps('headNodeConfig').runCustomScript]"
           }
         ]
       },
@@ -346,7 +371,7 @@
         "bladeTitle": "Compute node settings",
         "elements": [
           {
-            "name": "computeNodeNamePrefix",
+            "name": "namePrefix",
             "type": "Microsoft.Common.TextBox",
             "label": "Name prefix",
             "toolTip": "The name prefix of the compute nodes. For example, if 'IaaSCN' is specified, the compute node names will be 'IaaSCN000', 'IaaSCN001', ...",
@@ -358,7 +383,7 @@
             }
           },
           {
-            "name": "computeNodeNumber",
+            "name": "nodeNumber",
             "type": "Microsoft.Common.TextBox",
             "label": "Number of compute nodes",
             "toolTip": "The number of compute nodes to be created",
@@ -370,7 +395,7 @@
             }
           },
           {
-            "name": "computeNodeVMSize",
+            "name": "vmSize",
             "type": "Microsoft.Compute.SizeSelector",
             "label": "VM Size",
             "toolTip": "VM size for the compute nodes",
@@ -394,10 +419,10 @@
               ]
             },
             "osPlatform": "Windows",
-            "count": "[steps('computeNodeConfig').computeNodeNumber]"
+            "count": "[steps('computeNodeConfig').nodeNumber]"
           },
           {
-            "name": "computeNodeOsDiskType1",
+            "name": "osDiskType1",
             "type": "Microsoft.Common.DropDown",
             "label": "OS disk type",
             "defaultValue": "Premium SSD",
@@ -418,10 +443,10 @@
                 }
               ]
             },
-            "visible": "[contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's')]"
+            "visible": "[contains(toLower(replace(coalesce(steps('computeNodeConfig').vmSize, ''), 'Standard_', '')), 's')]"
           },
           {
-            "name": "computeNodeOsDiskType2",
+            "name": "osDiskType2",
             "type": "Microsoft.Common.DropDown",
             "label": "OS disk type",
             "defaultValue": "Standard SSD",
@@ -438,7 +463,7 @@
                 }
               ]
             },
-            "visible": "[not(contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's'))]"
+            "visible": "[not(contains(toLower(replace(coalesce(steps('computeNodeConfig').vmSize, ''), 'Standard_', '')), 's'))]"
           },
           {
             "name": "createDataDisks",
@@ -460,16 +485,16 @@
             }
           },
           {
-            "name": "computeNodeDataDisks",
+            "name": "dataDisks",
             "type": "Microsoft.Common.Section",
-            "label": "",
+            "label": "Data Disk Settings",
             "elements": [
               {
-                "name": "computeNodeDataDiskSize",
+                "name": "diskSize",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Size of each data disk",
                 "defaultValue": "128 GB",
-                "toolTip": "The size in GB for each data disk attached to compute nodes.",
+                "toolTip": "The size for each data disk attached to compute nodes.",
                 "constraints": {
                   "allowedValues": [
                     {
@@ -508,7 +533,7 @@
                 }
               },
               {
-                "name": "computeNodeDataDiskCount",
+                "name": "diskCount",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Number of data disks for each node",
                 "defaultValue": "1",
@@ -539,7 +564,7 @@
                 }
               },
               {
-                "name": "computeNodeDataDiskType1",
+                "name": "diskType1",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Data disk type",
                 "defaultValue": "Standard HDD",
@@ -560,10 +585,10 @@
                     }
                   ]
                 },
-                "visible": "[contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's')]"
+                "visible": "[contains(toLower(replace(coalesce(steps('computeNodeConfig').vmSize, ''), 'Standard_', '')), 's')]"
               },
               {
-                "name": "computeNodeDataDiskType2",
+                "name": "diskType2",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Data disk type",
                 "defaultValue": "Standard HDD",
@@ -580,13 +605,13 @@
                     }
                   ]
                 },
-                "visible": "[not(contains(toLower(replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, ''), 'Standard_', '')), 's'))]"
+                "visible": "[not(contains(toLower(replace(coalesce(steps('computeNodeConfig').vmSize, ''), 'Standard_', '')), 's'))]"
               }
             ],
             "visible": "[steps('computeNodeConfig').createDataDisks]"
           },
           {
-            "name": "computeNodeEnableAccelNet",
+            "name": "enableAccelNet",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Accelerated networking",
             "defaultValue": "Off",
@@ -603,14 +628,14 @@
                 }
               ]
             },
-            "visible": "[contains(';D4s_v3;D8s_v3;D16s_v3;D32s_v3;D64s_v3;D4_v3;D8_v3;D16_v3;D32_v3;D64_v3;D2_v2;D3_v2;D4_v2;D5_v2;D11_v2;D12_v2;D13_v2;D14_v2;D15_v2;DS2_v2;DS3_v2;DS4_v2;DS5_v2;DS11_v2;DS12_v2;DS13_v2;DS14_v2;DS15_v2;F2;F4;F8;F16;F2;F4;F8;F16;F2s;F4s;F8s;F16s;F4s_v2;F8s_v2;F16s_v2;F32s_v2;F64s_v2;F72s_v2;E4_v3;E8_v3;E16_v3;E20_v3;E32_v3;E64_v3;E64i_v3;E4s_v3;E8s_v3;E16s_v3;E20s_v3;E32s_v3;E64s_v3;E64is_v3;M8ms;M16ms;M32ts;M32ls;M32ms;M64s;M64ls;M64ms;M128s;M128ms', replace(coalesce(steps('computeNodeConfig').computeNodeVMSize, 'None'), 'Standard_', ';'))]"
+            "visible": "[contains(';D4s_v3;D8s_v3;D16s_v3;D32s_v3;D64s_v3;D4_v3;D8_v3;D16_v3;D32_v3;D64_v3;D2_v2;D3_v2;D4_v2;D5_v2;D11_v2;D12_v2;D13_v2;D14_v2;D15_v2;DS2_v2;DS3_v2;DS4_v2;DS5_v2;DS11_v2;DS12_v2;DS13_v2;DS14_v2;DS15_v2;F2;F4;F8;F16;F2;F4;F8;F16;F2s;F4s;F8s;F16s;F4s_v2;F8s_v2;F16s_v2;F32s_v2;F64s_v2;F72s_v2;E4_v3;E8_v3;E16_v3;E20_v3;E32_v3;E64_v3;E64i_v3;E4s_v3;E8s_v3;E16s_v3;E20s_v3;E32s_v3;E64s_v3;E64is_v3;M8ms;M16ms;M32ts;M32ls;M32ms;M64s;M64ls;M64ms;M128s;M128ms', replace(coalesce(steps('computeNodeConfig').vmSize, 'None'), 'Standard_', ';'))]"
           },
           {
-            "name": "computeNodeAsVMSS",
+            "name": "useVmss",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Use VM scale set (Experimental)",
             "defaultValue": "No",
-            "toolTip": "It is an experimental feature to create the compute nodes as VM scale set. Some HPC features may not work if you use this feature",
+            "toolTip": "It is an experimental feature to create the compute nodes as VM scale set. Some HPC features (for example 'Auto grow shrink') are not supported for VM scale set",
             "constraints": {
               "allowedValues": [
                 {
@@ -625,16 +650,57 @@
             }
           },
           {
-            "name": "computeNodePostConfigScript",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Post-configuration script URL",
-            "toolTip": "Optional URL of a public available PowerShell script you want to run on the compute nodes after they are configured. The script will be run as the Local System account. You can also specify arguments for the script, for example 'http://www.contoso.com/mycnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'.",
-            "defaultValue": "",
+            "name": "runCustomScript",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Run custom script",
+            "defaultValue": "No",
+            "toolTip": "Specify whether you want to run custom script on the compute nodes",
             "constraints": {
-              "required": false,
-              "regex": "^\\s*(https?://.+/[^/]+\\.ps1(\\s+\\S*)*)?$",
-              "validationMessage": "Must be HTTP or HTTPS URL and only PowerShell script is supported."
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
             }
+          },
+          {
+            "name": "customScript",
+            "type": "Microsoft.Common.Section",
+            "label": "Custom Script Settings",
+            "elements": [
+              {
+                "name": "scriptFileUrls",
+                "type": "Microsoft.Common.FileUpload",
+                "label": "Upload script file(s)",
+                "toolTip": "Upload one or more script files, the script files will be stored in a Microsoft provided temporary location and get purged after 24 hours.",
+                "constraints": {
+                  "required": false,
+                  "accept": ".ps1,.*"
+                },
+                "options": {
+                  "multiple": true,
+                  "uploadMode": "url",
+                  "openMode": "binary"
+                },
+                "visible": true
+              },
+              {
+                "name": "scriptCommandLine",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Command line to run",
+                "toolTip": "The command line to run the custom script you want to run on the head node after it is configured. The script will be run as the Local System account. You can also specify arguments for the script, for example \"PowerShell.exe -ExecutionPolicy ByPass -File cncustomscript.ps1 -Arg1 arg1 -Arg2 arg2\".",
+                "defaultValue": "",
+                "constraints": {
+                  "required": true
+                }
+              }
+            ],
+            "visible": "[steps('computeNodeConfig').runCustomScript]"
           }
         ]
       },
@@ -648,6 +714,13 @@
         "bladeTitle": "Infrastructure settings",
         "elements": [
           {
+            "name": "existingVNetText",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "An Active Directory Domain is required for HPC user and computer authentication. You can either select an existing virtual network in which an AD domain was already created, or create a new virtual network so that a new AD domain will be created by promoting the head node as domain controller."
+            }
+          },
+          {
             "name": "virtualNetwork",
             "type": "Microsoft.Network.VirtualNetworkCombo",
             "label": {
@@ -655,7 +728,7 @@
               "subnets": "Subnets"
             },
             "toolTip": {
-              "virtualNetwork": "The virtual network in which the virtual machines will be deployed. If you choose an existing virtual network, make sure a domain forest was already created before the deployment, or the deployment will fail.",
+              "virtualNetwork": "The virtual network in which the virtual machines will be deployed. If you choose an existing virtual network, make sure an AD domain already exists in it.",
               "subnets": "The subnet in which the virtual machines will be deployed"
             },
             "defaultValue": {
@@ -677,66 +750,43 @@
                 },
                 "constraints": {
                   "minAddressPrefixSize": "/24",
-                  "minAddressCount": "[add(1, steps('computeNodeConfig').computeNodeNumber)]",
-                  "requireContiguousAddresses": true
+                  "minAddressCount": "[max(50, add(1, steps('computeNodeConfig').nodeNumber))]",
+                  "requireContiguousAddresses": false
                 }
               }
             },
             "visible": true
           },
           {
-            "name": "newVNetText",
-            "type": "Microsoft.Common.TextBlock",
-            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, ''), 'new')]",
-            "options": {
-              "text": "HPC Pack 2012 R2 relies on Active Directory Domain Services for user and computer authentication. A new AD domain will be created by promoting the head node as domain controller."
-            }
-          },
-          {
-            "name": "existingVNetText",
-            "type": "Microsoft.Common.TextBlock",
-            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, ''), 'existing')]",
-            "options": {
-              "text": "HPC Pack 2012 R2 relies on Active Directory Domain Services for user and computer authentication. Select \"Join existing AD domain\" if an AD domain already exists in the virtual network, or select \"Create a new AD domain\" to promote the head node as domain controller."
-            }
-          },
-          {
-            "name": "domainOption",
-            "type": "Microsoft.Common.DropDown",
-            "label": "Active Directory domain",
-            "toolTip": "HPC Pack 2012 R2 relies on Active Directory Domain Services for user and computer authentication. All the HPC nodes with Windows operating system must be domain joined. You can either create a new AD domain for the cluster or join the cluster into an existing AD domain. <br />If you select \"Create a new AD domain\", the head node will be promoted as domain controller.",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Create a new AD domain",
-                  "value": "new"
-                },
-                {
-                  "label": "Join existing AD domain",
-                  "value": "existing"
-                }
-              ],
-              "required": true
-            },
-            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, 'new'), 'existing')]"
-          },
-          {
-            "name": "privateDomainName",
+            "name": "existingDomainName",
             "type": "Microsoft.Common.TextBox",
-            "label": "Forest root domain name",
-            "toolTip": "The fully qualified domain name (FQDN) for the private domain forest in which the virtual machines will join, for example, 'hpc.local'. If you choose an existing AD domain, make sure it was already created before the deployment.",
+            "label": "Existing AD domain name",
+            "toolTip": "The fully qualified domain name (FQDN) for the AD domain in which the virtual machines will join, for example, 'contoso.local'. Make sure the AD domain already exists in the select virtual network.",
+            "constraints": {
+              "required": true,
+              "regex": "^([a-z0-9]+\\.)?([a-z0-9][a-z0-9-]*\\.)+[a-z]{2,6}$",
+              "validationMessage": "Must be a valid fully-qualified domain name."
+            },
+            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, ''), 'existing')]"
+          },
+          {
+            "name": "newDomainName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "New AD domain name",
+            "toolTip": "The fully qualified domain name (FQDN) for the new AD domain in which the virtual machines will join, for example, 'hpc.local'. ",
             "defaultValue": "hpc.local",
             "constraints": {
               "required": true,
               "regex": "^([a-z0-9]+\\.)?([a-z0-9][a-z0-9-]*\\.)+[a-z]{2,6}$",
               "validationMessage": "Must be a valid fully-qualified domain name."
-            }
+            },
+            "visible": "[equals(coalesce(steps('infrastructureConfig').virtualNetwork.newOrExisting, ''), 'new')]"
           },
           {
             "name": "adminUsername",
             "type": "Microsoft.Compute.UserNameTextBox",
             "label": "Username",
-            "toolTip": "Local administrator username for the virtual machines as well as the domain user name.",
+            "toolTip": "The domain user name, also used as local administrator user name for the virtual machines.",
             "constraints": {
               "required": true
             },
@@ -750,7 +800,7 @@
               "confirmPassword": "Confirm password"
             },
             "toolTip": {
-              "password": "Local administrator password as well as the domain user password."
+              "password": "The domain user password, also used as local administrator user password."
             },
             "osPlatform": "Windows",
             "constraints": {
@@ -763,7 +813,7 @@
             "label": "Storage account for SOA",
             "toolTip": "The storage account for SOA common data and SOA session monitoring features",
             "defaultValue": {
-              "name": "storageaccount01",
+              "name": "[concat(basics('clusterName'), string(rand(1, 99999999)))]",
               "type": "Standard_LRS"
             },
             "constraints": {
@@ -791,24 +841,28 @@
       "subnetName": "[steps('infrastructureConfig').virtualNetwork.subnets.subnet1.name]",
       "subnetAddressPrefix": "[steps('infrastructureConfig').virtualNetwork.subnets.subnet1.addressPrefix]",
       "subnetStartAddress": "[steps('infrastructureConfig').virtualNetwork.subnets.subnet1.startAddress]",
-      "domainName": "[steps('infrastructureConfig').privateDomainName]",
+      "domainName": "[coalesce(steps('infrastructureConfig').newDomainName, steps('infrastructureConfig').existingDomainName)]",
       "adminUsername": "[steps('infrastructureConfig').adminUsername]",
       "adminPassword": "[steps('infrastructureConfig').adminPassword.password]",
       "soaStorageAccountCreateOption": "[steps('infrastructureConfig').soaStorageAccount.newOrExisting]",
       "soaStorageAccountRGName": "[steps('infrastructureConfig').soaStorageAccount.resourceGroup]",
       "soaStorageAccountName": "[steps('infrastructureConfig').soaStorageAccount.name]",
       "soaStorageAccountType": "[steps('infrastructureConfig').soaStorageAccount.type]",
-      "publicIPName": "[coalesce(steps('headNodeConfig').headNodePublicIP.name, '')]",
-      "publicIPRGName": "[coalesce(steps('headNodeConfig').headNodePublicIP.resourceGroup, '')]",
-      "publicIPCreateOption": "[steps('headNodeConfig').headNodePublicIP.newOrExistingOrNone]",
-      "publicIPDNSNameLabel": "[coalesce(steps('headNodeConfig').headNodePublicIP.domainNameLabel, '')]",
-      "headNodeVMSize": "[steps('headNodeConfig').headNodeVMSize]",
-      "headNodeOsDiskType": "[coalesce(steps('headNodeConfig').headNodeOsDiskType1, steps('headNodeConfig').headNodeOsDiskType2)]",
-      "headNodeDataDiskSize": "[steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskSize]",
-      "headNodeDataDiskType": "[coalesce(steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskType1, steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskType2)]",
-      "headNodeDataDiskCount": "[steps('headNodeConfig').headNodeDataDisks.headNodeDataDiskCount]",
-      "headNodeElement1": "[steps('headNodeConfig').hnelement1]",
-      "headNodePostConfigScript": "[coalesce(steps('headNodeConfig').headNodePostConfigScript, '')]",
+      "publicIPName": "[steps('headNodeConfig').publicIP.name]",
+      "publicIPRGName": "[steps('headNodeConfig').publicIP.resourceGroup]",
+      "publicIPCreateOption": "[steps('headNodeConfig').publicIP.newOrExistingOrNone]",
+      "publicIPDNSNameLabel": "[steps('headNodeConfig').publicIP.domainNameLabel]",
+      "publicIPSku": "[steps('headNodeConfig').publicIP.sku]",
+      "publicIP": "[steps('headNodeConfig').publicIP]",
+      "publicIPAllocationMethod": "[steps('headNodeConfig').publicIP.publicIPAllocationMethod]",
+      "headNodeVMSize": "[steps('headNodeConfig').vmSize]",
+      "headNodeOsDiskType": "[coalesce(steps('headNodeConfig').osDiskType1, steps('headNodeConfig').osDiskType2)]",
+      "headNodeDataDiskSize": "[steps('headNodeConfig').dataDisks.diskSize]",
+      "headNodeDataDiskType": "[coalesce(steps('headNodeConfig').dataDisks.diskType1, steps('headNodeConfig').dataDisks.diskType2)]",
+      "headNodeDataDiskCount": "[steps('headNodeConfig').dataDisks.diskCount]",
+      "headNodeEnableAcceleratedNetworking": "[steps('headNodeConfig').enableAccelNet]",
+      "headNodePostConfigScriptFileUrls": "[steps('headNodeConfig').customScript.scriptFileUrls]",
+      "headNodePostConfigScriptCommand": "[steps('headNodeConfig').customScript.scriptCommandLine]",
       "computeNodeImageOsPlatform": "Windows",
       "computeNodeImageRef": {
         "publisher": "MicrosoftWindowsServerHPCPack",
@@ -816,16 +870,17 @@
         "sku": "2012R2CN",
         "version": "latest"
       },
-      "computeNodeNamePrefix": "[steps('computeNodeConfig').computeNodeNamePrefix]",
-      "computeNodeNumber": "[int(steps('computeNodeConfig').computeNodeNumber)]",
-      "computeNodeDiskType": "[steps('headNodeConfig').computeNodeDiskType]",
-      "computeNodeVMSize": "[steps('computeNodeConfig').computeNodeVMSize]",
-      "computeNodeOsDiskType": "[coalesce(steps('computeNodeConfig').computeNodeOsDiskType1, steps('computeNodeConfig').computeNodeOsDiskType2)]",
-      "computeNodeDataDiskSize": "[steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskSize]",
-      "computeNodeDataDiskCount": "[steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskCount]",
-      "computeNodeDataDiskType": "[coalesce(steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskType1, steps('computeNodeConfig').computeNodeDataDisks.computeNodeDataDiskType2)]",
-      "useVmssForComputeNodes": "[steps('computeNodeConfig').computeNodeAsVMSS]",
-      "computeNodePostConfigScript": "[coalesce(steps('computeNodeConfig').computeNodePostConfigScript, '')]"
+      "computeNodeNamePrefix": "[steps('computeNodeConfig').namePrefix]",
+      "computeNodeNumber": "[int(steps('computeNodeConfig').nodeNumber)]",
+      "computeNodeVMSize": "[steps('computeNodeConfig').vmSize]",
+      "computeNodeOsDiskType": "[coalesce(steps('computeNodeConfig').osDiskType1, steps('computeNodeConfig').osDiskType2)]",
+      "computeNodeDataDiskSize": "[steps('computeNodeConfig').dataDisks.diskSize]",
+      "computeNodeDataDiskType": "[coalesce(steps('computeNodeConfig').dataDisks.diskType1, steps('computeNodeConfig').dataDisks.diskType2)]",
+      "computeNodeDataDiskCount": "[steps('computeNodeConfig').dataDisks.diskCount]",
+      "computeNodeEnableAcceleratedNetworking": "[steps('computeNodeConfig').enableAccelNet]",
+      "useVmssForComputeNodes": "[steps('computeNodeConfig').useVmss]",
+      "computeNodeCustomScriptFileUrls": "[steps('computeNodeConfig').customScript.scriptFileUrls]",
+      "computeNodeCustomScriptCommand": "[steps('computeNodeConfig').customScript.scriptCommandLine]"
     }
   }
 }
