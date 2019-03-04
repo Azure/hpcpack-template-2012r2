@@ -4,7 +4,6 @@
   "parameters": {
     "location": {
       "type": "string",
-      "defaultValue": "[resourceGroup().location]",
       "metadata": {
         "description": "Location for the resources."
       }
@@ -65,6 +64,12 @@
         "description": "The image reference"
       }
     },
+    "imageOsPlatform": {
+      "type": "string",
+      "metadata": {
+        "description": "The VM image OS platform for the compute nodes"
+      }
+    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -95,14 +100,14 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Specify whether to install RDMA driver, currently not used for VMSS"
+        "description": "Specify whether to install RDMA driver, not used for Linux nodes"
       }
     },
     "enableAutomaticUpdates": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Specify whether the VM is enabled for automatic updates"
+        "description": "Specify whether the VM is enabled for automatic updates, not used for Linux nodes"
       }
     },
     "enableAcceleratedNetworking": {
@@ -110,13 +115,6 @@
       "defaultValue": false,
       "metadata": {
         "description": "Specify whether to create the Azure VM with accelerated networking"
-      }
-    },
-    "dnsServers": {
-      "type": "array",
-      "defaultValue": [],
-      "metadata": {
-        "description": "The DNS servers"
       }
     },
     "clusterName": {
@@ -128,7 +126,14 @@
     "domainName": {
       "type": "string",
       "metadata": {
-        "description": "The fully qualified domain name (FQDN) for the domain forest in which the compute node will join, for example 'hpc.local'."
+        "description": "The fully qualified domain name (FQDN) for the domain forest in which the cluster is created, for example 'hpc.local'."
+      }
+    },
+    "dnsServers": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "The DNS servers"
       }
     },
     "computeNodeCustomScriptFileUrls": {
@@ -147,6 +152,10 @@
     }
   },
   "variables": {
+    "isWindowsOS": "[equals(toLower(parameters('imageOsPlatform')), 'windows')]",
+    "windowsConfiguration": {
+      "enableAutomaticUpdates": "[parameters('enableAutomaticUpdates')]"
+    },
     "emptyArray": [],
     "vmdataDisks": {
       "copy": [
@@ -164,7 +173,24 @@
         }
       ]
     },
-    "basicVmssExtension": [
+    "dnsSettings": {
+      "dnsServers": "[parameters('dnsServers')]"
+    },
+    "lnxBasicExtension": [
+      {
+        "name": "installHPCNodeAgent",
+        "properties": {
+          "publisher": "Microsoft.HpcPack",
+          "type": "LinuxNodeAgent",
+          "typeHandlerVersion": "1.6",
+          "autoUpgradeMinorVersion": true,
+          "protectedSettings": {
+            "ClusterName": "[concat(parameters('clusterName'), '.', parameters('domainName'))]"
+          }
+        }
+      }
+    ],
+    "winBasicExtension": [
       {
         "name": "joinADDomain",
         "properties": {
@@ -195,7 +221,22 @@
         "autoUpgradeMinorVersion": true
       }
     },
-    "postConfigScriptExtension": {
+    "lnxCustomScriptExtension": {
+      "name": "postConfigScript",
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": "[parameters('computeNodeCustomScriptFileUrls')]"
+        },
+        "protectedSettings": {
+          "commandToExecute": "[parameters('computeNodeCustomScriptCommand')]"
+        }
+      }
+    },
+    "winCustomScriptExtension": {
       "name": "postConfigScript",
       "properties": {
         "publisher": "Microsoft.Compute",
@@ -210,8 +251,10 @@
         }
       }
     },
-    "midVmssExtensions": "[if(parameters('installRDMADriver'), concat(variables('basicVmssExtension'), array(variables('hpcDriverExtension'))), variables('basicVmssExtension'))]",
-    "vmssExtensions": "[if(empty(parameters('computeNodeCustomScriptCommand')), variables('midVmssExtensions'), concat(variables('midVmssExtensions'), array(variables('postConfigScriptExtension'))))]"
+    "basicVmssExtension": "[if(variables('isWindowsOS'), variables('winBasicExtension'), variables('lnxBasicExtension'))]",
+    "customScriptExtension": "[if(variables('isWindowsOS'), variables('winCustomScriptExtension'), variables('lnxCustomScriptExtension'))]",
+    "midVmssExtensions": "[if(and(parameters('installRDMADriver'), variables('isWindowsOS')), concat(variables('basicVmssExtension'), array(variables('hpcDriverExtension'))), variables('basicVmssExtension'))]",
+    "vmssExtensions": "[if(empty(parameters('computeNodeCustomScriptCommand')), variables('midVmssExtensions'), concat(variables('midVmssExtensions'), array(variables('customScriptExtension'))))]"
   },
   "resources": [
     {
@@ -247,9 +290,7 @@
             "adminUsername": "[parameters('adminUsername')]",
             "adminPassword": "[parameters('adminPassword')]",
             "customData": "[parameters('customData')]",
-            "windowsConfiguration": {
-              "enableAutomaticUpdates": "[parameters('enableAutomaticUpdates')]"
-            }
+            "windowsConfiguration": "[if(variables('isWindowsOS'), variables('windowsConfiguration'), json('null'))]"
           },
           "networkProfile": {
             "networkInterfaceConfigurations": [
@@ -258,6 +299,7 @@
                 "properties": {
                   "primary": true,
                   "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]",
+                  "dnsSettings": "[if(empty(parameters('dnsServers')), json('null'), variables('dnsSettings'))]",
                   "ipConfigurations": [
                     {
                       "name": "ipconfig1",
@@ -267,11 +309,7 @@
                         }
                       }
                     }
-                  ],
-                  "dnsSettings": {
-                    "dnsServers": "[parameters('dnsServers')]"
-                  }
-
+                  ]
                 }
               }
             ]

@@ -247,7 +247,7 @@
     },
     "publicIPResourceGroupName": {
       "type": "string",
-      "defaultValue": "",
+      "defaultValue": "[resourceGroup().name]",
       "metadata": {
         "description": "Resource group for the public IP address resource, shall be specified only when 'publicIPCreateOption' is specified as 'existing'"
       }
@@ -336,9 +336,9 @@
     },
     "_artifactsLocation": {
       "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources/",
       "metadata": {
-        "description": "The base URI where artifacts (nested templates or scripts) required by this template are located.",
-        "artifactsBaseUrl": ""
+        "description": "The base URI where artifacts (nested templates or scripts) required by this template are located."
       }
     },
     "_artifactsLocationSasToken": {
@@ -369,8 +369,7 @@
     },
     "defaultSoaStorageAccountName": "[toLower(concat('hpc', uniqueString(resourceGroup().id, toLower(parameters('clusterName')))))]",
     "soaStorageAccountName": "[if(empty(parameters('soaStorageAccountName')), variables('defaultSoaStorageAccountName'), parameters('soaStorageAccountName'))]",
-    "soaStorageAccountRGName": "[if(empty(parameters('soaStorageAccountResourceGroupName')), resourceGroup().name, parameters('soaStorageAccountResourceGroupName'))]",
-    "soaStorageAccountId": "[resourceId(variables('soaStorageAccountRGName'), 'Microsoft.Storage/storageAccounts', variables('soaStorageAccountName'))]",
+    "soaStorageAccountId": "[resourceId(parameters('soaStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts', variables('soaStorageAccountName'))]",
     "soaStorageConnStrPrefix": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('soaStorageAccountName'), ';AccountKey=')]",
     "headnodeImageReference": {
       "publisher": "MicrosoftWindowsServerHPCPack",
@@ -381,17 +380,13 @@
     "computeNodeUsesCustomImage": "[contains(parameters('computeNodeImageRef'), 'id')]",
     "privateClusterFQDN": "[concat(toLower(parameters('clusterName')), '.', parameters('domainName'))]",
     "vmssSinglePlacementGroup": "[lessOrEquals(parameters('computeNodeNumber'), if(variables('computeNodeUsesCustomImage'), 40, 100))]",
-    "vnetRGName": "[if(empty(parameters('virtualNetworkResourceGroupName')), resourceGroup().name, parameters('virtualNetworkResourceGroupName'))]",
-    "subnetAddressPrefix": "[if(empty(parameters('subnetAddressPrefix')), '10.0.0.0/22', parameters('subnetAddressPrefix'))]",
     "hnPrivateIPAllocationMethod": "[if(equals(parameters('newOrExistingDomainForest'), 'new'), 'Static', 'Dynamic')]",
-    "headNodePrivateIP": "[if(empty(parameters('subnetStartAddress')), '10.0.0.4', parameters('subnetStartAddress'))]",
-    "vnetID": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]",
-    "publicIPAddressRgName": "[if(empty(parameters('publicIPResourceGroupName')), resourceGroup().name, parameters('publicIPResourceGroupName'))]",
+    "vnetID": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+    "subnetRef": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), parameters('subnetName'))]",
     "publicIPAddressName": "[if(empty(parameters('publicIPName')), concat(parameters('clusterName'), '-PublicIP-HN'), parameters('publicIPName'))]",
     "publicIPDNSNameLabel": "[if(empty(parameters('publicIPDNSNameLabel')), toLower(parameters('clusterName')), parameters('publicIPDNSNameLabel'))]",
     "publicIpAddressId": {
-      "id": "[resourceId(variables('publicIPAddressRgName'), 'Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+      "id": "[resourceId(parameters('publicIPResourceGroupName'), 'Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
     },
     "availabilitySetNamePrefix": "[concat(parameters('clusterName'), '-avset')]",
     "nbrVMPerAvailabilitySet": 180,
@@ -418,10 +413,6 @@
       "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('hnAvailabilitySetName'))]"
     },
     "computeVmssName": "[take(replace(parameters('computeNodeNamePrefix'), '-', ''), 9)]",
-    "computeNodeTemplateName": "[if(equals(parameters('computeNodeImageOsPlatform'), 'Linux'), 'linuxnode.json', 'windowsnode.json')]",
-    "computeNodeTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('computeNodeTemplateName'), parameters('_artifactsLocationSasToken')))]",
-    "computeNodeVmssTemplateName": "[if(equals(parameters('computeNodeImageOsPlatform'), 'Linux'), 'linuxvmss.json', 'windowsvmss.json')]",
-    "computeNodeVmssTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('computeNodeVmssTemplateName'), parameters('_artifactsLocationSasToken')))]",
     "userCustomImageReference": {
       "publisher": "user",
       "offer": "custom",
@@ -438,10 +429,23 @@
       "[uri(parameters('_artifactsLocation'), concat('HPCHNPrepare.ps1', parameters('_artifactsLocationSasToken')))]"
     ],
     "headNodeScriptFileUrls": "[concat(variables('configHeadNodeScriptFileUrls'), parameters('headNodePostConfigScriptFileUrls'))]",
-    "iaasInfoArg": "[concat('-SubscriptionId ', subscription().subscriptionId, ' -VNet ', parameters('virtualNetworkName'), ' -Subnet ', parameters('subnetName'), ' -Location \"', parameters('location'), '\" -ResourceGroup ', variables('vnetRGName'))]",
+    "iaasInfoArg": "[concat('-SubscriptionId ', subscription().subscriptionId, ' -VNet ', parameters('virtualNetworkName'), ' -Subnet ', parameters('subnetName'), ' -Location \"', parameters('location'), '\" -ResourceGroup ', parameters('virtualNetworkResourceGroupName'))]",
     "headNodeCommandStr": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File PrepareHN.ps1 -DomainFQDN ', parameters('domainName'), ' -AdminUserName ', parameters('adminUsername'), ' -AdminBase64Password \"', variables('adminBase64Password'), '\" -CNSize ', parameters('computeNodeVMSize'), ' -PostConfigScript \"', base64(trim(parameters('headNodePostConfigScriptCommand'))), '\" ', variables('iaasInfoArg'))]"
   },
   "resources": [
+    {
+      "apiVersion": "2018-02-01",
+      "name": "pid-b128c7db-38a3-54f7-8e59-d40e5e42a40b",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
     {
       "condition": "[equals(parameters('soaStorageAccountCreateOption'), 'new')]",
       "apiVersion": "2018-07-01",
@@ -468,7 +472,7 @@
           {
             "name": "[parameters('subnetName')]",
             "properties": {
-              "addressPrefix": "[variables('subnetAddressPrefix')]"
+              "addressPrefix": "[parameters('subnetAddressPrefix')]"
             }
           }
         ]
@@ -599,7 +603,7 @@
             "name": "IPConfig",
             "properties": {
               "privateIPAllocationMethod": "[variables('hnPrivateIPAllocationMethod')]",
-              "privateIPAddress": "[variables('headNodePrivateIP')]",
+              "privateIPAddress": "[parameters('subnetStartAddress')]",
               "publicIPAddress": "[if(not(equals(parameters('publicIPCreateOption'), 'none')), variables('publicIpAddressId') , json('null'))]",
               "subnet": {
                 "id": "[variables('subnetRef')]"
@@ -778,7 +782,7 @@
                 },
                 "dhcpOptions": {
                   "dnsServers": [
-                    "[variables('headNodePrivateIP')]"
+                    "[parameters('subnetStartAddress')]"
                   ]
                 },
                 "subnets": [
@@ -834,7 +838,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('computeNodeTemplateUrl')]",
+          "uri": "[uri(parameters('_artifactsLocation'), concat('computenode.json', parameters('_artifactsLocationSasToken')))]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -867,6 +871,9 @@
           },
           "imageReference": {
             "value": "[parameters('computeNodeImageRef')]"
+          },
+          "imageOsPlatform": {
+            "value": "[parameters('computeNodeImageOsPlatform')]"
           },
           "adminUsername": {
             "value": "[parameters('adminUsername')]"
@@ -912,7 +919,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('computeNodeVmssTemplateUrl')]",
+          "uri": "[uri(parameters('_artifactsLocation'), concat('computevmss.json', parameters('_artifactsLocationSasToken')))]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -945,6 +952,9 @@
           },
           "imageReference": {
             "value": "[parameters('computeNodeImageRef')]"
+          },
+          "imageOsPlatform": {
+            "value": "[parameters('computeNodeImageOsPlatform')]"
           },
           "adminUsername": {
             "value": "[parameters('adminUsername')]"

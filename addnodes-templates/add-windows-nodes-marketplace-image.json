@@ -169,9 +169,33 @@
       "metadata": {
         "description": "The fully qualified domain name (FQDN) for the existing domain forest in which the HPC cluster will join, for example 'hpc.local'."
       }
+    },
+    "customScriptFileUrls": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. Split with a single space (' ') for multiple URLs. The script will be run as the Local System account (or root for Linux nodes)."
+      }
+    },
+    "customScriptCommand": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, the command line to run the compute node post-config script. The script will be run as the Local System account. For example 'mycnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+      }
+    },
+    "dnsServer": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The DNS server for the compute nodes. If not specified, the DNS setting for the VNet will be applied. You can specify multiple DNS servers in order separated with ','."
+      }
     }
   },
   "variables": {
+    "emptyArray": [],
+    "dnsServers": "[if(empty(trim(parameters('dnsServer'))), variables('emptyArray'), split(trim(parameters('dnsServer')), ','))]",
+    "computeNodeCustomScriptFileUrls": "[if(empty(trim(parameters('customScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('customScriptFileUrls')), ' '))]",
     "diskTypes": {
       "Standard_HDD": "Standard_LRS",
       "Standard_SSD": "StandardSSD_LRS",
@@ -242,10 +266,13 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(variables('sharedResxBaseUrl'), 'windowsnode.json')]",
+          "uri": "[uri(variables('sharedResxBaseUrl'), 'computenode.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[resourceGroup().location]"
+          },
           "nicName": {
             "value": "[concat(parameters('computeNodeNamePrefix'), padLeft(string(copyIndex(parameters('computeNodeNameStartIndex'))), 3, '0'), variables('nicNameSuffix'))]"
           },
@@ -261,9 +288,6 @@
           "osDiskType": {
             "value": "[variables('diskTypes')[parameters('computeNodeOsDiskType')]]"
           },
-          "imageReference": {
-            "value": "[variables('computeNodeImageRef')]"
-          },
           "dataDiskSize": {
             "value": "[parameters('dataDiskSizeInGB')]"
           },
@@ -272,6 +296,12 @@
           },
           "dataDiskType": {
             "value": "[variables('diskTypes')[parameters('dataDiskType')]]"
+          },
+          "imageReference": {
+            "value": "[variables('computeNodeImageRef')]"
+          },
+          "imageOsPlatform": {
+            "value": "Windows"
           },
           "adminUsername": {
             "value": "[parameters('domainUsername')]"
@@ -291,11 +321,20 @@
           "enableAcceleratedNetworking": {
             "value": "[if(equals(parameters('enableAcceleratedNetworking'), 'Yes'), bool('true'), bool('false'))]"
           },
+          "dnsServers": {
+            "value": "[variables('dnsServers')]"
+          },
           "clusterName": {
             "value": "[parameters('clusterName')]"
           },
           "domainName": {
             "value": "[parameters('domainName')]"
+          },
+          "computeNodeCustomScriptFileUrls": {
+            "value": "[variables('computeNodeCustomScriptFileUrls')]"
+          },
+          "computeNodeCustomScriptCommand": {
+            "value": "[trim(parameters('customScriptCommand'))]"
           }
         }
       }
@@ -308,10 +347,13 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(variables('sharedResxBaseUrl'), 'windowsvmss.json')]",
+          "uri": "[uri(variables('sharedResxBaseUrl'), 'computevmss.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[resourceGroup().location]"
+          },
           "subnetId": {
             "value": "[variables('subnetRef')]"
           },
@@ -327,9 +369,6 @@
           "osDiskType": {
             "value": "[variables('diskTypes')[parameters('computeNodeOsDiskType')]]"
           },
-          "imageReference": {
-            "value": "[variables('computeNodeImageRef')]"
-          },
           "dataDiskSize": {
             "value": "[parameters('dataDiskSizeInGB')]"
           },
@@ -338,6 +377,12 @@
           },
           "dataDiskType": {
             "value": "[variables('diskTypes')[parameters('dataDiskType')]]"
+          },
+          "imageReference": {
+            "value": "[variables('computeNodeImageRef')]"
+          },
+          "imageOsPlatform": {
+            "value": "Windows"
           },
           "adminUsername": {
             "value": "[parameters('domainUsername')]"
@@ -357,11 +402,20 @@
           "enableAcceleratedNetworking": {
             "value": "[if(equals(parameters('enableAcceleratedNetworking'), 'Yes'), bool('true'), bool('false'))]"
           },
+          "dnsServers": {
+            "value": "[variables('dnsServers')]"
+          },
           "clusterName": {
             "value": "[parameters('clusterName')]"
           },
           "domainName": {
             "value": "[parameters('domainName')]"
+          },
+          "computeNodeCustomScriptFileUrls": {
+            "value": "[variables('computeNodeCustomScriptFileUrls')]"
+          },
+          "computeNodeCustomScriptCommand": {
+            "value": "[trim(parameters('customScriptCommand'))]"
           }
         }
       }
