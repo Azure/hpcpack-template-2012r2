@@ -232,7 +232,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Optional, the command line to run the head node post-config script. The script will be run as the Local System account. For example 'myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+        "description": "Optional, the command line to run the uploaded custom script file with syntax \"&lt;scriptFileName&gt;.ps1 [&lt;Args&gt;]\". The script will be run as Local System account. For example: \"myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2\"."
       }
     },
     "computeNodeCustomScriptFileUrls": {
@@ -246,7 +246,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Optional, the command line to run the compute node post-config script. The script will be run as the Local System account. For example 'mycnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+        "description": "Optional, the command line to run custom script on the compute node as Local System account. <br/>You can directly run the uploaded script file(s) in the command line, for example: <br/>&nbsp;&nbsp;&nbsp;&nbsp;cncustomscript.ps1 -Arg1 arg1 -Arg2 arg2<br/>Or refer to <a href='https://docs.microsoft.com/en-us/powershell/scripting/components/console/powershell.exe-command-line-help' target='_blank'>PowerShell.exe command line help</a>, for example:<br/>&nbsp;&nbsp;&nbsp;&nbsp;1. PowerShell.exe -Command \"Start-Service -Name eventlog\"<br/>&nbsp;&nbsp;&nbsp;&nbsp;2. PowerShell.exe -EncodedCommand U3RhcnQtU2VydmljZSAtTmFtZSBldmVudGxvZw==<br/>&nbsp;&nbsp;&nbsp;&nbsp;3. PowerShell.exe -ExecutionPolicy Unrestricted -File cncustomscript.ps1 -Arg1 arg1 -Arg2 arg2"
       }
     }
   },

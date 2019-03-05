@@ -271,7 +271,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Optional, the command line to run the head node post-config script. The script will be run as the Local System account. For example 'myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+        "description": "Optional, the command line to run the uploaded custom script file with syntax \"&lt;scriptFileName&gt;.ps1 [&lt;Args&gt;]\". The script will be run as Local System account. For example: \"myhnpostscript.ps1 -Arg1 arg1 -Arg2 arg2\"."
       }
     },
     "computeNodeCustomScriptFileUrls": {
@@ -285,7 +285,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Optional, the command line to run the compute node post-config script. The script will be run as the Local System account. For example 'mycnpostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
+        "description": "Optional, the command line to run custom script on the compute nodes as Local System (or root for Linux nodes) account. <br/>You can use the uploaded script file(s) in the command line, for example:<br/>&nbsp;&nbsp;&nbsp;&nbsp;cncustomscript.ps1 -Arg1 arg1 -Arg2 arg2<br/>&nbsp;&nbsp;&nbsp;&nbsp;1. sh cncustomscript.sh arg1 arg2<br/>&nbsp;&nbsp;&nbsp;&nbsp;2. python cncustomscript.py<br/>Or just run a command if no script file is uploaded, for example:<br/>&nbsp;&nbsp;&nbsp;&nbsp;1. PowerShell.exe -Command \"Start-Service -Name eventlog\"<br/>&nbsp;&nbsp;&nbsp;&nbsp;2. PowerShell.exe -EncodedCommand U3RhcnQtU2VydmljZSAtTmFtZSBldmVudGxvZw==<br/>&nbsp;&nbsp;&nbsp;&nbsp;apt-get -y update && apt-get install -y apache2"
       }
     }
   },
