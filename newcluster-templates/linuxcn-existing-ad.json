@@ -38,7 +38,7 @@
       "type": "string",
       "defaultValue": "Standard_DS4_v2",
       "metadata": {
-        "description": "The VM size of the head node, all available VM sizes in Azure can be found at https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
+        "description": "The VM size of the head node, all available VM sizes in Azure can be found at <a href='https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes' target='_blank'>Azure VM Sizes</a>. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
       }
     },
     "headNodeOsDiskType": {
@@ -50,7 +50,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of head node VM. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
+        "description": "The disk type of head node VM. Note that Premium_SSD only supports some VM sizes, see <a href='https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes' target='_blank'>Azure VM Sizes</a>"
       }
     },
     "computeNodeImage": {
@@ -108,7 +108,7 @@
       "type": "string",
       "defaultValue": "Standard_D3_v2",
       "metadata": {
-        "description": "The VM size of the compute nodes, all available VM sizes in Azure can be found at https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
+        "description": "The VM size of the compute nodes, all available VM sizes in Azure can be found at <a href='https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes' target='_blank'>Azure VM Sizes</a>. Note that some VM sizes in the list are only available in some particular locations. Please check the availability and the price of the VM sizes at https://azure.microsoft.com/pricing/details/virtual-machines/windows/ before deployment."
       }
     },
     "computeNodeOsDiskType": {
@@ -120,7 +120,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "The disk type of compute node VM. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
+        "description": "The disk type of compute node VM. Note that Premium_SSD only supports some VM sizes, see <a href='https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes' target='_blank'>Azure VM Sizes</a>"
       }
     },
     "useVmssForComputeNodes": {
@@ -142,7 +142,7 @@
         "No"
       ],
       "metadata": {
-        "description": "Specify whether to create the Azure VMs with accelerated networking or not. Note accelerated networking is supported only for some VM sizes and Linux distributions. If you specify it as 'Yes', you must specify accelerated networking supported VM sizes and operating systems for all the VMs in the cluster. More information about accelerated networking please see https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-powershell."
+        "description": "Specify whether to create the Azure VMs with accelerated networking or not. Note accelerated networking is supported only for some VM sizes and Linux distributions. If you specify it as 'Yes', you must specify accelerated networking supported VM sizes and operating systems for all the VMs in the cluster. See <a href='https://docs.microsoft.com/en-us/azure/virtual-network/create-vm-accelerated-networking-powershell' target='_blank'>Accelerated Networking</a> for more information."
       }
     },
     "domainUsername": {
@@ -197,7 +197,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "Head node data disk type. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
+        "description": "Head node data disk type. Note that Premium_SSD only supports some VM sizes, see <a href='https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes' target='_blank'>Azure VM Sizes</a>"
       }
     },
     "computeNodeDataDiskCount": {
@@ -240,7 +240,7 @@
         "Premium_SSD"
       ],
       "metadata": {
-        "description": "Compute node data disk type. Note that Premium_SSD only supports some VM sizes, see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes"
+        "description": "Compute node data disk type. Note that Premium_SSD only supports some VM sizes, see <a href='https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes' target='_blank'>Azure VM Sizes</a>"
       }
     },
     "createPublicIPAddressForHeadNode": {
@@ -290,7 +290,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. Split with a single space (' ') for multiple URLs. The script will be run as the Local System account (or root for Linux nodes)."
+        "description": "Optional, the URL(s) for the PowerShell script file(s) you want to run on the compute node after it is configured. Split with a single space (' ') for multiple URLs. The script will be run as root user."
       }
     },
     "computeNodeCustomScriptCommand": {
