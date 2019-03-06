@@ -305,7 +305,7 @@
     "emptyArray": [],
     "headNodePostConfigScriptFileUrls": "[if(empty(trim(parameters('headNodePostConfigScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('headNodePostConfigScriptFileUrls')), ' '))]",
     "computeNodeCustomScriptFileUrls": "[if(empty(trim(parameters('computeNodeCustomScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('computeNodeCustomScriptFileUrls')), ' '))]",
-    "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/HPCPack2012R2/master/shared-resources/",
+    "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/hpcpack-template-2012r2/master/shared-resources/",
     "diskTypes": {
       "Standard_HDD": "Standard_LRS",
       "Standard_SSD": "StandardSSD_LRS",
