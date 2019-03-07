@@ -267,7 +267,7 @@
     "computeNodeCustomScriptFileUrls": "[if(empty(trim(parameters('computeNodeCustomScriptFileUrls'))), variables('emptyArray'), split(trim(parameters('computeNodeCustomScriptFileUrls')), ' '))]",
     "virtualNetworkName": "[concat(parameters('clusterName'), 'VNet')]",
     "subnetName": "Subnet-1",
-    "artifactsBaseUrl": "https://raw.githubusercontent.com/sunbinzhu/hpcpack-template-2012r2/master/shared-resources/",
+    "artifactsBaseUrl": "https://raw.githubusercontent.com/Azure/hpcpack-template-2012r2/master/shared-resources/",
     "computeNodeImageId": "[resourceId(parameters('computeNodeCustomImageRGName'), 'Microsoft.Compute/images', parameters('computeNodeCustomImageName'))]",
     "diskTypes": {
       "Standard_HDD": "Standard_LRS",
