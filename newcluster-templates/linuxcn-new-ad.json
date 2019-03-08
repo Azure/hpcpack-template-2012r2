@@ -44,6 +44,8 @@
         "CentOS_6.6",
         "CentOS_6.7",
         "CentOS_6.8",
+        "CentOS_6.9",
+        "CentOS_6.10",
         "CentOS_7.0",
         "CentOS_7.1",
         "CentOS_7.2",
@@ -311,6 +313,18 @@
         "sku": "6.8",
         "version": "latest"
       },
+      "CentOS_6.9": {
+        "publisher": "OpenLogic",
+        "offer": "CentOS",
+        "sku": "6.9",
+        "version": "latest"
+      },
+      "CentOS_6.10": {
+        "publisher": "OpenLogic",
+        "offer": "CentOS",
+        "sku": "6.10",
+        "version": "latest"
+      },
       "CentOS_7.0": {
         "publisher": "OpenLogic",
         "offer": "CentOS",
@@ -428,13 +442,13 @@
       "Ubuntu_14.04": {
         "publisher": "Canonical",
         "offer": "UbuntuServer",
-        "sku": "14.04.3-LTS",
+        "sku": "14.04.5-LTS",
         "version": "latest"
       },
       "Ubuntu_16.04": {
         "publisher": "Canonical",
         "offer": "UbuntuServer",
-        "sku": "16.04.0-LTS",
+        "sku": "16.04-LTS",
         "version": "latest"
       }
     },
