@@ -182,7 +182,7 @@
         "properties": {
           "publisher": "Microsoft.HpcPack",
           "type": "LinuxNodeAgent",
-          "typeHandlerVersion": "1.6",
+          "typeHandlerVersion": "1.7",
           "autoUpgradeMinorVersion": true,
           "protectedSettings": {
             "ClusterName": "[concat(parameters('clusterName'), '.', parameters('domainName'))]"
