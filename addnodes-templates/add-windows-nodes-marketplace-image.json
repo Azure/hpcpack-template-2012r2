@@ -227,7 +227,9 @@
       "Standard_H16mr",
       "Standard_NC24r",
       "Standard_NC24rs_v2",
-      "Standard_ND24rs"
+      "Standard_ND24rs",
+      "Standard_HB60rs",
+      "Standard_HC44rs"
     ],
     "cnInstallRDMADriver": "[contains(variables('rdmaVMSizes'), parameters('computeNodeVMSize'))]",
     "cnUseVMSS": "[equals(parameters('useVmssForComputeNodes'), 'Yes')]",

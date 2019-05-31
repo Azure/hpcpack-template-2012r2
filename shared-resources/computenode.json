@@ -254,7 +254,7 @@
           ],
           "properties": {
             "publisher": "Microsoft.HpcCompute",
-            "type": "HpcVmDrivers",
+            "type": "InfiniBandDriverWindows",
             "typeHandlerVersion": "1.1",
             "autoUpgradeMinorVersion": true
           }
@@ -311,13 +311,30 @@
           }
         },
         {
+          "condition": "[and(not(variables('isWindowsOS')), parameters('installRDMADriver'))]",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "[concat(parameters('vmName'), '/installLinuxRDMADriver')]",
+          "apiVersion": "2018-10-01",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.HpcCompute",
+            "type": "InfiniBandDriverLinux",
+            "typeHandlerVersion": "1.0",
+            "autoUpgradeMinorVersion": true
+          }
+        },
+        {
           "condition": "[not(variables('isWindowsOS'))]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'), '/installHPCNodeAgent')]",
           "apiVersion": "2018-10-01",
           "location": "[parameters('location')]",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'), '/extensions/installLinuxRDMADriver')]"
           ],
           "properties": {
             "publisher": "Microsoft.HpcPack",

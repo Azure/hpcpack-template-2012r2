@@ -404,7 +404,9 @@
       "Standard_H16mr",
       "Standard_NC24r",
       "Standard_NC24rs_v2",
-      "Standard_ND24rs"
+      "Standard_ND24rs",
+      "Standard_HB60rs",
+      "Standard_HC44rs"
     ],
     "cnInstallRDMADriver": "[contains(variables('rdmaVMSizes'), parameters('computeNodeVMSize'))]",
     "hnInstallRDMADriver": "[contains(variables('rdmaVMSizes'), parameters('headNodeVMSize'))]",
@@ -423,6 +425,7 @@
     "customDataImageName": "[concat(variables('cusomDataImageRef').offer, '-', variables('cusomDataImageRef').sku)]",
     "customDataImageCategory": "[if(variables('computeNodeUsesCustomImage'), 'user', 'public')]",
     "computeNodeCustomData": "[base64(concat('HPCClusterName=', parameters('clusterName'), '\r\nImageCategory=', variables('customDataImageCategory'), '\r\nImageName=', variables('customDataImageName'), '\r\nVMSize=', parameters('computeNodeVMSize')))]",
+    "infinibandDriverSupportedCNImage": "[or(equals(parameters('computeNodeImageOsPlatform'), 'Windows'), and(or(equals(variables('cusomDataImageRef').offer, 'CentOS'), equals(variables('cusomDataImageRef').offer, 'RHEL')), contains(variables('cusomDataImageRef').sku, '7.')))]",
     "adminBase64Password": "[base64(parameters('adminPassword'))]",
     "configHeadNodeScriptFileUrls": [
       "[uri(parameters('_artifactsLocation'), concat('PrepareHN.ps1', parameters('_artifactsLocationSasToken')))]",
@@ -687,7 +690,7 @@
       ],
       "properties": {
         "publisher": "Microsoft.HpcCompute",
-        "type": "HpcVmDrivers",
+        "type": "InfiniBandDriverWindows",
         "typeHandlerVersion": "1.1",
         "autoUpgradeMinorVersion": true
       }
@@ -888,7 +891,7 @@
             "value": "[variables('computeNodeCustomData')]"
           },
           "installRDMADriver": {
-            "value": "[variables('cnInstallRDMADriver')]"
+            "value": "[and(variables('cnInstallRDMADriver'), variables('infinibandDriverSupportedCNImage'))]"
           },
           "enableAcceleratedNetworking": {
             "value": "[parameters('computeNodeEnableAcceleratedNetworking')]"
@@ -969,7 +972,7 @@
             "value": "[variables('vmssSinglePlacementGroup')]"
           },
           "installRDMADriver": {
-            "value": "[variables('cnInstallRDMADriver')]"
+            "value": "[and(variables('cnInstallRDMADriver'), variables('infinibandDriverSupportedCNImage'))]"
           },
           "enableAcceleratedNetworking": {
             "value": "[parameters('computeNodeEnableAcceleratedNetworking')]"
