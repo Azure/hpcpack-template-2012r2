@@ -243,7 +243,7 @@
       "condition": "[not(or(variables('cnUseVMSS'), empty(parameters('availabilitySetName'))))]",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('availabilitySetName')]",
-      "apiVersion": "2018-06-01",
+      "apiVersion": "2019-03-01",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Aligned"
@@ -255,7 +255,7 @@
     },
     {
       "condition": "[not(variables('cnUseVMSS'))]",
-      "apiVersion": "2018-05-01",
+      "apiVersion": "2019-05-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', parameters('computeNodeNamePrefix'), padLeft(string(copyIndex(parameters('computeNodeNameStartIndex'))), 3, '0'))]",
       "dependsOn": [
@@ -343,7 +343,7 @@
     },
     {
       "condition": "[variables('cnUseVMSS')]",
-      "apiVersion": "2018-05-01",
+      "apiVersion": "2019-05-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', variables('computeVmssName'))]",
       "properties": {

@@ -437,7 +437,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2018-02-01",
+      "apiVersion": "2019-05-01",
       "name": "pid-b128c7db-38a3-54f7-8e59-d40e5e42a40b",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -451,7 +451,7 @@
     },
     {
       "condition": "[equals(parameters('soaStorageAccountCreateOption'), 'new')]",
-      "apiVersion": "2018-07-01",
+      "apiVersion": "2019-04-01",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('soaStorageAccountName')]",
       "location": "[parameters('location')]",
@@ -463,7 +463,7 @@
     },
     {
       "condition": "[equals(parameters('newOrExistingDomainForest'), 'new')]",
-      "apiVersion": "2018-08-01",
+      "apiVersion": "2019-04-01",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[parameters('virtualNetworkName')]",
       "location": "[parameters('location')]",
@@ -485,7 +485,7 @@
       "condition": "[not(equals(parameters('publicIPCreateOption'), 'none'))]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgName')]",
-      "apiVersion": "2018-08-01",
+      "apiVersion": "2019-04-01",
       "location": "[parameters('location')]",
       "properties": {
         "securityRules": [
@@ -578,7 +578,7 @@
     },
     {
       "condition": "[equals(parameters('publicIPCreateOption'), 'new')]",
-      "apiVersion": "2018-08-01",
+      "apiVersion": "2019-04-01",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[parameters('location')]",
@@ -593,7 +593,7 @@
       }
     },
     {
-      "apiVersion": "2018-08-01",
+      "apiVersion": "2019-04-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicNameHN')]",
       "location": "[parameters('location')]",
@@ -622,7 +622,7 @@
       "condition": "[and(greater(parameters('computeNodeNumber'), 0), and(variables('cnInstallRDMADriver'), not(parameters('useVmssForComputeNodes'))))]",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[concat(variables('availabilitySetNamePrefix'), padLeft(string(copyIndex()), 2, '0'))]",
-      "apiVersion": "2018-06-01",
+      "apiVersion": "2019-03-01",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Aligned"
@@ -637,7 +637,7 @@
       }
     },
     {
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('clusterName')]",
       "location": "[parameters('location')]",
@@ -683,7 +683,7 @@
       "condition": "[variables('hnInstallRDMADriver')]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('clusterName'), '/installRDMADriver')]",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2019-03-01",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('clusterName'))]"
@@ -699,7 +699,7 @@
       "condition": "[equals(parameters('newOrExistingDomainForest'), 'new')]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('clusterName'), '/CreateADPDC')]",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2019-03-01",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('clusterName'))]",
@@ -735,7 +735,7 @@
       "condition": "[not(equals(parameters('newOrExistingDomainForest'), 'new'))]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('clusterName'), '/JoinADDomain')]",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2019-03-01",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('clusterName'))]",
@@ -761,7 +761,7 @@
     },
     {
       "condition": "[equals(parameters('newOrExistingDomainForest'), 'new')]",
-      "apiVersion": "2018-05-01",
+      "apiVersion": "2019-05-01",
       "type": "Microsoft.Resources/deployments",
       "name": "updateVNetDNS",
       "dependsOn": [
@@ -775,7 +775,7 @@
           "contentVersion": "1.0.0.0",
           "resources": [
             {
-              "apiVersion": "2018-08-01",
+              "apiVersion": "2019-04-01",
               "name": "[parameters('virtualNetworkName')]",
               "type": "Microsoft.Network/virtualNetworks",
               "location": "[parameters('location')]",
@@ -803,7 +803,7 @@
       }
     },
     {
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('clusterName'),'/configureHeadNode')]",
       "location": "[parameters('location')]",
@@ -821,13 +821,13 @@
           "fileUris": "[variables('headNodeScriptFileUrls')]"
         },
         "protectedSettings": {
-          "commandToExecute": "[concat(variables('headNodeCommandStr'), ' -AzureStorageConnStr \"', if(not(equals(parameters('soaStorageAccountCreateOption'), 'none')), concat(variables('soaStorageConnStrPrefix'), listKeys(variables('soaStorageAccountId'), '2018-07-01').keys[0].value), ''), '\" -PublicDnsName ', if(equals(parameters('publicIPCreateOption'), 'none'), variables('privateClusterFQDN'), reference(variables('publicIpAddressId').id, '2018-08-01').dnsSettings.fqdn))]"
+          "commandToExecute": "[concat(variables('headNodeCommandStr'), ' -AzureStorageConnStr \"', if(not(equals(parameters('soaStorageAccountCreateOption'), 'none')), concat(variables('soaStorageConnStrPrefix'), listKeys(variables('soaStorageAccountId'), '2019-04-01').keys[0].value), ''), '\" -PublicDnsName ', if(equals(parameters('publicIPCreateOption'), 'none'), variables('privateClusterFQDN'), reference(variables('publicIpAddressId').id, '2019-04-01').dnsSettings.fqdn))]"
         }
       }
     },
     {
       "condition": "[and(greater(parameters('computeNodeNumber'), 0), not(parameters('useVmssForComputeNodes')))]",
-      "apiVersion": "2018-05-01",
+      "apiVersion": "2019-05-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', parameters('computeNodeNamePrefix'), padLeft(string(copyIndex()), 3, '0'))]",
       "dependsOn": [
@@ -913,7 +913,7 @@
     },
     {
       "condition": "[and(greater(parameters('computeNodeNumber'), 0), parameters('useVmssForComputeNodes'))]",
-      "apiVersion": "2018-05-01",
+      "apiVersion": "2019-05-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', parameters('computeNodeNamePrefix'))]",
       "dependsOn": [
@@ -996,7 +996,7 @@
   "outputs": {
     "clusterDNSName": {
       "type": "string",
-      "value": "[if(equals(parameters('publicIPCreateOption'), 'none'), variables('privateClusterFQDN'), reference(variables('publicIpAddressId').id, '2018-08-01').dnsSettings.fqdn)]"
+      "value": "[if(equals(parameters('publicIPCreateOption'), 'none'), variables('privateClusterFQDN'), reference(variables('publicIpAddressId').id, '2019-04-01').dnsSettings.fqdn)]"
     }
   }
 }

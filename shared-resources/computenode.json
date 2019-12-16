@@ -182,7 +182,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2018-08-01",
+      "apiVersion": "2019-04-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[parameters('nicName')]",
       "location": "[parameters('location')]",
@@ -203,7 +203,7 @@
       }
     },
     {
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('vmName')]",
       "location": "[parameters('location')]",
@@ -247,7 +247,7 @@
           "condition": "[and(variables('isWindowsOS'), parameters('installRDMADriver'))]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'), '/installRDMADriver')]",
-          "apiVersion": "2018-10-01",
+          "apiVersion": "2019-03-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
@@ -263,7 +263,7 @@
           "condition": "[variables('isWindowsOS')]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'),'/joinADDomain')]",
-          "apiVersion": "2018-10-01",
+          "apiVersion": "2019-03-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
@@ -291,7 +291,7 @@
           "condition": "[and(variables('isWindowsOS'), not(empty(parameters('computeNodeCustomScriptCommand'))))]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'),'/customScript')]",
-          "apiVersion": "2018-10-01",
+          "apiVersion": "2019-03-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
@@ -314,7 +314,7 @@
           "condition": "[and(not(variables('isWindowsOS')), parameters('installRDMADriver'))]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'), '/installLinuxRDMADriver')]",
-          "apiVersion": "2018-10-01",
+          "apiVersion": "2019-03-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
@@ -330,7 +330,7 @@
           "condition": "[not(variables('isWindowsOS'))]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'), '/installHPCNodeAgent')]",
-          "apiVersion": "2018-10-01",
+          "apiVersion": "2019-03-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
@@ -350,7 +350,7 @@
           "condition": "[and(not(variables('isWindowsOS')), not(empty(parameters('computeNodeCustomScriptCommand'))))]",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmName'), '/customLinuxScript')]",
-          "apiVersion": "2018-10-01",
+          "apiVersion": "2019-03-01",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
