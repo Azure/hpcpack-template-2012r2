@@ -51,10 +51,6 @@
         "RHEL_7.2",
         "RHEL_7.3",
         "RHEL_7.4",
-        "SLES_12_SP3",
-        "SLES_12_SP3_HPC",
-        "SLES_12_SP3_HPC_Premium",
-        "SLES_12_SP3_Premium",
         "Ubuntu_14.04",
         "Ubuntu_16.04"
       ],
@@ -161,7 +157,7 @@
         "description": "The availability set name if you want to create the compute nodes in an availability set. For RDMA capable VMs, you shall specify this parameter. If you want to create the compute nodes in an existing availabity set, it must be in the same resource group which you selected for this deployment. It is not applicable if you use VMSS."
       }
     },
-    "useVmssForComputeNodes": {
+    "useVMScaleSet": {
       "type": "string",
       "defaultValue": "No",
       "allowedValues": [
@@ -169,7 +165,18 @@
         "No"
       ],
       "metadata": {
-        "description": "Specify whether to use VM scale set to create compute nodes. 'Yes' for VM scale set, 'No' for VMs. Note it is an experimental feature to create the compute nodes as VM scale set. Some HPC features(for example 'Azure auto grow shrink') will not work if you use this feature."
+        "description": "Specify whether you want to use the experimental feature to create compute nodes as VM scale set. Note that it is not recommended to use this feature in production cluster."
+      }
+    },
+    "useSpotInstances": {
+      "type": "string",
+      "defaultValue": "No",
+      "allowedValues": [
+        "Yes",
+        "No"
+      ],
+      "metadata": {
+        "description": "Specify whether you want to use the experimental feature to create compute nodes as <a href='https://azure.microsoft.com/pricing/spot/' target='_blank'>Azure Spot instances</a>. Note that it is not recommended to use this feature in production cluster."
       }
     },
     "enableAcceleratedNetworking": {
@@ -401,7 +408,8 @@
     ],
     "cnInstallRDMADriver": "[or(contains(variables('rdmaASeries'), parameters('computeNodeVMSize')), contains(toLower(split(parameters('computeNodeVMSize'), '_')[1]), 'r'))]",
     "infinibandDriverSupportedCNImage": "[and(or(equals(variables('computeNodeImageRef').offer, 'CentOS'), equals(variables('computeNodeImageRef').offer, 'RHEL')), contains(variables('computeNodeImageRef').sku, '7.'))]",
-    "cnUseVMSS": "[equals(parameters('useVmssForComputeNodes'), 'Yes')]",
+    "useVmssForCN": "[equals(parameters('useVMScaleSet'), 'Yes')]",
+    "vmPriority": "[if(equals(parameters('useSpotInstances'), 'Yes'), 'Spot', 'Regular')]",
     "computeVmssName": "[take(replace(parameters('computeNodeNamePrefix'), '-', ''), 9)]",
     "vmssSinglePlacementGroup": "[lessOrEquals(parameters('computeNodeNumber'), 100)]",
     "computeNodeCustomData": "[base64(concat('HPCClusterName=', parameters('clusterName'), '\r\nImageCategory=public\r\nImageName=', variables('computeNodeImageRef').offer, '-', variables('computeNodeImageRef').sku, '\r\nVMSize=', parameters('computeNodeVMSize')))]",
@@ -409,7 +417,7 @@
   },
   "resources": [
     {
-      "condition": "[not(or(variables('cnUseVMSS'), empty(parameters('availabilitySetName'))))]",
+      "condition": "[not(or(variables('useVmssForCN'), empty(parameters('availabilitySetName'))))]",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('availabilitySetName')]",
       "apiVersion": "2019-03-01",
@@ -423,7 +431,7 @@
       }
     },
     {
-      "condition": "[not(variables('cnUseVMSS'))]",
+      "condition": "[not(variables('useVmssForCN'))]",
       "apiVersion": "2019-05-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', parameters('computeNodeNamePrefix'), padLeft(string(copyIndex(parameters('computeNodeNameStartIndex'))), 3, '0'))]",
@@ -486,6 +494,9 @@
           "customData": {
             "value": "[variables('computeNodeCustomData')]"
           },
+          "vmPriority": {
+            "value": "[variables('vmPriority')]"
+          },
           "installRDMADriver": {
             "value": "[and(variables('cnInstallRDMADriver'), variables('infinibandDriverSupportedCNImage'))]"
           },
@@ -511,7 +522,7 @@
       }
     },
     {
-      "condition": "[variables('cnUseVMSS')]",
+      "condition": "[variables('useVmssForCN')]",
       "apiVersion": "2019-05-01",
       "type": "Microsoft.Resources/deployments",
       "name": "[concat('create', variables('computeVmssName'))]",
@@ -566,6 +577,9 @@
           },
           "singlePlacementGroup": {
             "value": "[variables('vmssSinglePlacementGroup')]"
+          },
+          "vmPriority": {
+            "value": "[variables('vmPriority')]"
           },
           "installRDMADriver": {
             "value": "[and(variables('cnInstallRDMADriver'), variables('infinibandDriverSupportedCNImage'))]"

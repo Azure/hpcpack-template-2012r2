@@ -96,11 +96,18 @@
         "description": "Specify whether the scale set is limited to a single placement group"
       }
     },
+    "vmPriority": {
+      "type": "string",
+      "defaultValue": "Regular",
+      "metadata": {
+        "description": "Specify the priority of the virtual machines in the scale set, Regular or Low."
+      }
+    },
     "installRDMADriver": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Specify whether to install RDMA driver, not used for Linux nodes"
+        "description": "Specify whether to install RDMA driver"
       }
     },
     "enableAutomaticUpdates": {
@@ -217,8 +224,10 @@
       "properties": {
         "publisher": "Microsoft.HpcCompute",
         "type": "InfiniBandDriverWindows",
-        "typeHandlerVersion": "1.1",
-        "autoUpgradeMinorVersion": true
+        "typeHandlerVersion": "1.2",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+        }
       }
     },
     "hpcLinuxDriverExtension": {
@@ -226,8 +235,10 @@
       "properties": {
         "publisher": "Microsoft.HpcCompute",
         "type": "InfiniBandDriverLinux",
-        "typeHandlerVersion": "1.0",
-        "autoUpgradeMinorVersion": true
+        "typeHandlerVersion": "1.1",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+        }
       }
     },
     "lnxCustomScriptExtension": {
@@ -326,7 +337,9 @@
           },
           "extensionProfile": {
             "extensions": "[variables('vmssExtensions')]"
-          }
+          },
+          "priority": "[parameters('vmPriority')]",
+          "evictionPolicy": "[if(equals(parameters('vmPriority'), 'Regular'), json('null'), 'Deallocate')]"
         }
       }
     }

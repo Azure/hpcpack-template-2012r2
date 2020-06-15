@@ -234,6 +234,13 @@
         "description": "Specify whether to use VMSS or VMs to create compute nodes"
       }
     },
+    "computeNodeVmPriority": {
+      "type": "string",
+      "defaultValue": "Regular",
+      "metadata": {
+        "description": "Specify the priority of the virtual machines, Regular or <a href='https://azure.microsoft.com/pricing/spot/' target='_blank'>Spot</a>. Note that it is not recommended to use Spot instance in production cluster."
+      }
+    },
     "publicIPCreateOption": {
       "type": "string",
       "allowedValues": [
@@ -903,6 +910,9 @@
           "customData": {
             "value": "[variables('computeNodeCustomData')]"
           },
+          "vmPriority": {
+            "value": "[parameters('computeNodeVmPriority')]"
+          },
           "installRDMADriver": {
             "value": "[and(variables('cnInstallRDMADriver'), variables('infinibandDriverSupportedCNImage'))]"
           },
@@ -983,6 +993,9 @@
           },
           "singlePlacementGroup": {
             "value": "[variables('vmssSinglePlacementGroup')]"
+          },
+          "vmPriority": {
+            "value": "[parameters('computeNodeVmPriority')]"
           },
           "installRDMADriver": {
             "value": "[and(variables('cnInstallRDMADriver'), variables('infinibandDriverSupportedCNImage'))]"

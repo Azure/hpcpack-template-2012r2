@@ -96,11 +96,18 @@
         "description": "The custom data in base64 format"
       }
     },
+    "vmPriority": {
+      "type": "string",
+      "defaultValue": "Regular",
+      "metadata": {
+        "description": "Specify the priority of the virtual machines, Regular or Low."
+      }
+    },
     "installRDMADriver": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Specify whether to install RDMA driver, not used for Linux node"
+        "description": "Specify whether to install RDMA driver"
       }
     },
     "enableAutomaticUpdates": {
@@ -240,7 +247,9 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
             }
           ]
-        }
+        },
+        "priority": "[parameters('vmPriority')]",
+        "evictionPolicy": "[if(equals(parameters('vmPriority'), 'Regular'), json('null'), 'Deallocate')]"
       },
       "resources": [
         {
@@ -255,7 +264,7 @@
           "properties": {
             "publisher": "Microsoft.HpcCompute",
             "type": "InfiniBandDriverWindows",
-            "typeHandlerVersion": "1.1",
+            "typeHandlerVersion": "1.2",
             "autoUpgradeMinorVersion": true
           }
         },
@@ -322,7 +331,7 @@
           "properties": {
             "publisher": "Microsoft.HpcCompute",
             "type": "InfiniBandDriverLinux",
-            "typeHandlerVersion": "1.0",
+            "typeHandlerVersion": "1.1",
             "autoUpgradeMinorVersion": true
           }
         },

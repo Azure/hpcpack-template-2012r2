@@ -706,6 +706,25 @@
             }
           },
           {
+            "name": "vmPriority",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Use Spot instance (Experimental)",
+            "defaultValue": "No",
+            "toolTip": "It is an experimental feature to use <a href='http://go.microsoft.com/fwlink/?LinkId=2104270' target='_blank'>Azure Spot instance</a> to create the compute nodes. With this option, the Azure VMs can be evicted at any point in time when Azure needs the capacity back, in that case, the HPC compute nodes will be shown unreachable in HPC cluster manager.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "Spot"
+                },
+                {
+                  "label": "No",
+                  "value": "Regular"
+                }
+              ]
+            }
+          },
+          {
             "name": "runCustomScript",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Run custom script",
@@ -931,6 +950,7 @@
       "computeNodeDataDiskCount": "[steps('computeNodeConfig').dataDisks.diskCount]",
       "computeNodeEnableAcceleratedNetworking": "[steps('computeNodeConfig').enableAccelNet]",
       "useVmssForComputeNodes": "[steps('computeNodeConfig').useVmss]",
+      "computeNodeVmPriority": "[steps('computeNodeConfig').vmPriority]",      
       "computeNodeCustomScriptFileUrls": "[steps('computeNodeConfig').customScript.scriptFileUrls]",
       "computeNodeCustomScriptCommand": "[steps('computeNodeConfig').customScript.scriptCommandLine]"
     }
